@@ -1,11 +1,90 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { parse } from 'yaml';
+import { INFO } from '../../consts';
 
 const projects = parse(readFileSync('src/content/projects.yaml', 'utf-8'));
 const isVideo = (src: string) => /\.(mp4|webm|mov|ogg)(\?|$)/i.test(src);
 const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
+
+type LatestCommit = {
+    message: string;
+    repoName: string;
+    sha: string;
+    url: string;
+    ago: string;
+};
+
+function timeAgo(date: Date): string {
+    const mins = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
+    return `${Math.floor(mins / 1440)}d ago`;
+}
+
+const repoSlugs = (projects as any[])
+    .map((p: any) => p.github)
+    .filter(Boolean)
+    .map((url: string) => url.replace('https://github.com/', ''))
+    .filter((slug: string) => /^[\w.-]+\/[\w.-]+$/.test(slug));
+
+const CACHE_FILE = '.cache/github-commits.json';
+const CACHE_TTL  = 10 * 60 * 1000; // 10 minutes
+
+type CacheEntry = { fetchedAt: number; results: any[] };
+
+function readCache(): CacheEntry | null {
+    try {
+        const raw = readFileSync(CACHE_FILE, 'utf-8');
+        const entry: CacheEntry = JSON.parse(raw);
+        if (Date.now() - entry.fetchedAt < CACHE_TTL) return entry;
+    } catch {}
+    return null;
+}
+
+function writeCache(results: any[]) {
+    try {
+        mkdirSync('.cache', { recursive: true });
+        writeFileSync(CACHE_FILE, JSON.stringify({ fetchedAt: Date.now(), results }));
+    } catch {}
+}
+
+const cached = readCache();
+const commitResults: any[] = cached
+    ? cached.results
+    : await (async () => {
+        const results = await Promise.all(
+            repoSlugs.map(async (slug: string) => {
+                try {
+                    const resp = await fetch(`https://api.github.com/repos/${slug}/commits?per_page=1`);
+                    if (!resp.ok) return null;
+                    const [c] = await resp.json();
+                    if (!c) return null;
+                    return {
+                        message: c.commit.message.split('\n')[0],
+                        repoName: slug.split('/')[1],
+                        sha: c.sha.slice(0, 7),
+                        url: c.html_url,
+                        date: new Date(c.commit.committer.date).toISOString(),
+                    };
+                } catch { return null; }
+            })
+        );
+        writeCache(results);
+        return results;
+    })();
+
+const best = commitResults
+    .filter(Boolean)
+    .sort((a, b) => new Date(b!.date).getTime() - new Date(a!.date).getTime())[0] ?? null;
+
+const latestCommit: LatestCommit | null = best
+    ? { ...best!, ago: timeAgo(new Date(best!.date)) }
+    : null;
+
+const now = new Date();
+const refreshedAt = `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')} ${now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase()}`;
 ---
 
 <BaseLayout pageTitle="Projects">
@@ -14,6 +93,23 @@ const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
             <span class="mono tag">/ projects</span>
             <h1>things i've built</h1>
             <p>some of the fun stuff i've made!</p>
+            {latestCommit && (
+                <div class="commit-wrap">
+                <span class="commit-label mono">most recent commit · refreshed {refreshedAt}</span>
+                <a class="commit-strip mono" href={latestCommit.url} target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-git"></i>
+                    <span class="commit-msg">{latestCommit.message}</span>
+                    <span class="commit-meta">
+                        <span class="repo">{latestCommit.repoName}</span>
+                        <span class="dot-sep">·</span>
+                        <span class="ago">{latestCommit.ago}</span>
+                        <span class="dot-sep">·</span>
+                        <span class="sha">{latestCommit.sha}</span>
+                        <i class="bi bi-arrow-up-right"></i>
+                    </span>
+                </a>
+                </div>
+            )}
         </header>
 
         <div class="grid">
@@ -78,7 +174,64 @@ const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
 
         .tag { display: block; color: var(--text-dim); font-size: 0.9rem; margin-bottom: 0.5rem; }
         h1   { margin-bottom: 0.75rem; text-transform: lowercase; }
-        p    { font-size: 1.1rem; }
+        p    { font-size: 1.1rem; margin-bottom: 1rem; }
+    }
+
+    .commit-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .commit-label {
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        letter-spacing: 0.04em;
+    }
+
+    .commit-strip {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.45rem 0.85rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 0.6rem;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: border-color 0.2s ease, color 0.2s ease;
+        max-width: 100%;
+
+        &:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .bi-git { color: var(--text-dim); flex-shrink: 0; }
+
+        .commit-msg {
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 22rem;
+        }
+
+        .commit-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-shrink: 0;
+        }
+
+        .repo   { color: var(--accent); }
+        .ago    { color: var(--text-dim); }
+        .sha    { color: var(--text-dim); letter-spacing: 0.04em; }
+        .dot-sep { color: var(--border); }
+
+        .bi-arrow-up-right { font-size: 0.7rem; color: var(--text-dim); }
     }
 
     .grid {

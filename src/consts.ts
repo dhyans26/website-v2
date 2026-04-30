@@ -8,4 +8,5 @@ export const INFO = {
     github: 'dhyans26',
     email: 'me@dhyans.dev',
     site: 'dhyans.dev',
+    repo: 'website-v2',
 }

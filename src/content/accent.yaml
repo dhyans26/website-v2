@@ -1,0 +1,11 @@
+
+# Higher weight = appears more often.
+# Available colors match the CSS tokens in globals.scss.
+
+red:    3
+orange: 3
+yellow: 2
+blue:   3
+purple: 4
+pink:   1
+green:  1

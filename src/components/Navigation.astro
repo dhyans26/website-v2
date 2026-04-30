@@ -100,6 +100,16 @@ import { INFO } from '../consts';
     /* ── dot / trigger ── */
     .theme-wrap {
         position: relative;
+
+        // Invisible hit-area: 0.75rem around the dot + bridges the 0.7rem gap to the menu
+        &::before {
+            content: '';
+            position: absolute;
+            top: -0.75rem;
+            left: -0.75rem;
+            right: -0.75rem;
+            bottom: -0.7rem;
+        }
     }
 
     .dot {
@@ -149,7 +159,8 @@ import { INFO } from '../consts';
         z-index: 200;
         backdrop-filter: blur(10px);
 
-        &.open {
+        .theme-wrap:hover > &,
+        .theme-wrap:focus-within > & {
             opacity: 1;
             pointer-events: auto;
             transform: translateX(-50%) translateY(0);
@@ -219,45 +230,31 @@ import { INFO } from '../consts';
     const menu = document.getElementById('theme-menu') as HTMLElement      | null;
     const html = document.documentElement;
 
-    // ── restore & apply saved accent ────────────────────────────
-    const saved = localStorage.getItem('accent') ?? 'red';
-    applyAccent(saved);
+    // ── sync swatch highlight with accent picked on load ─────────
+    applyAccent(html.dataset.accent || 'red');
     // enable colour transition only after the initial paint so the dot
     // never animates from the wrong colour on load
     requestAnimationFrame(() => btn?.classList.add('themed'));
 
-    // ── toggle dropdown ─────────────────────────────────────────
-    btn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const opening = !menu?.classList.contains('open');
-        menu?.classList.toggle('open', opening);
-        btn.setAttribute('aria-expanded', String(opening));
-    });
+    // ── hover open/close (aria-expanded kept in sync for a11y) ──
+    const wrap = btn?.closest<HTMLElement>('.theme-wrap');
+    wrap?.addEventListener('mouseenter', () => btn?.setAttribute('aria-expanded', 'true'));
+    wrap?.addEventListener('mouseleave', () => btn?.setAttribute('aria-expanded', 'false'));
 
-    // close on outside click
-    document.addEventListener('click', () => {
-        menu?.classList.remove('open');
-        btn?.setAttribute('aria-expanded', 'false');
-    });
-
-    // close on Escape
+    // close on Escape (keyboard nav)
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            menu?.classList.remove('open');
             btn?.setAttribute('aria-expanded', 'false');
-            btn?.focus();
+            btn?.blur();
         }
     });
 
     // ── swatch clicks ────────────────────────────────────────────
     menu?.querySelectorAll<HTMLButtonElement>('.swatch').forEach(sw => {
-        sw.addEventListener('click', (e) => {
-            e.stopPropagation();
+        sw.addEventListener('click', () => {
             const accent = sw.dataset.accent!;
             applyAccent(accent);
-            localStorage.setItem('accent', accent);
-            menu.classList.remove('open');
-            btn?.setAttribute('aria-expanded', 'false');
+            sessionStorage.setItem('accent', accent);
         });
     });
 

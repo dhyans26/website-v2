@@ -1,6 +1,19 @@
 ---
+import { execSync } from 'child_process';
 import { INFO } from '../consts';
+
 const year = new Date().getFullYear();
+
+let commitHash = '';
+let commitMsg = '';
+let commitDate = '';
+try {
+    commitHash = execSync('git log -1 --format=%h').toString().trim();
+    commitMsg  = execSync('git log -1 --format=%s').toString().trim();
+    commitDate = execSync('git log -1 --format=%cd --date=short').toString().trim();
+} catch {}
+
+const commitUrl = `https://github.com/${INFO.github}/${INFO.repo}/commit/${commitHash}`;
 ---
 
 <footer class="footer">
@@ -9,6 +22,14 @@ const year = new Date().getFullYear();
             <span class="mono">made with <span class="heart">♥</span> by {INFO.name}</span>
             <span class="mono dim">© {year} — built w/ astro + sass</span>
         </div>
+        {commitHash && (
+            <a class="commit mono" href={commitUrl} target="_blank" rel="noopener">
+                <i class="bi bi-git"></i>
+                <span class="hash">{commitHash}</span>
+                <span class="msg">{commitMsg}</span>
+                <span class="date dim">{commitDate}</span>
+            </a>
+        )}
         <div class="right">
             <a href={`https://github.com/${INFO.github}`} target="_blank" rel="noopener">
                 <i class="bi bi-github"></i>
@@ -50,6 +71,27 @@ const year = new Date().getFullYear();
 
     .heart {
         color: var(--red);
+    }
+
+    .commit {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.78rem;
+        color: var(--text-dim);
+        text-decoration: none;
+        padding: 0.35rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        transition: color 0.2s ease, border-color 0.2s ease;
+        max-width: 28rem;
+        overflow: hidden;
+
+        &:hover { color: var(--text-muted); border-color: var(--accent); }
+
+        .hash { color: var(--accent); flex-shrink: 0; }
+        .msg  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .date { flex-shrink: 0; }
     }
 
     .right {
