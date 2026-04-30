@@ -1,0 +1,358 @@
+---
+// Modal shell — content injected by JS when a card is clicked
+---
+
+<div class="overlay" id="proj-modal" aria-modal="true" role="dialog" hidden>
+    <button class="close-btn" id="modal-close" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+    </button>
+
+    <div class="panel">
+        <div class="media-section" id="modal-media-section">
+            <button class="arrow left"  id="modal-prev" aria-label="Previous"><i class="bi bi-chevron-left"></i></button>
+            <div class="media-display" id="modal-media-display"></div>
+            <button class="arrow right" id="modal-next" aria-label="Next"><i class="bi bi-chevron-right"></i></button>
+        </div>
+
+        <div class="dots" id="modal-dots"></div>
+
+        <div class="info" id="modal-info">
+            <h3 id="modal-title"></h3>
+            <p  id="modal-desc"></p>
+            <div class="pills" id="modal-tech"></div>
+            <div class="ext-links" id="modal-links"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const overlay  = document.getElementById('proj-modal')!;
+    const display  = document.getElementById('modal-media-display')!;
+    const dotsWrap = document.getElementById('modal-dots')!;
+    const section  = document.getElementById('modal-media-section')!;
+    const prevBtn  = document.getElementById('modal-prev')!;
+    const nextBtn  = document.getElementById('modal-next')!;
+    const titleEl  = document.getElementById('modal-title')!;
+    const descEl   = document.getElementById('modal-desc')!;
+    const techEl   = document.getElementById('modal-tech')!;
+    const linksEl  = document.getElementById('modal-links')!;
+
+    let media: string[] = [];
+    let idx = 0;
+
+    const isVideo = (src: string) => /\.(mp4|webm|mov|ogg)(\?|$)/i.test(src);
+
+    function renderMedia(src: string) {
+        display.innerHTML = '';
+        if (isVideo(src)) {
+            const v = document.createElement('video');
+            v.src = src;
+            v.autoplay = true;
+            v.loop = true;
+            v.muted = true;
+            v.playsInline = true;
+            v.controls = true;
+            display.appendChild(v);
+        } else {
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = '';
+            display.appendChild(img);
+        }
+    }
+
+    function renderDots() {
+        dotsWrap.innerHTML = '';
+        if (media.length <= 1) return;
+        media.forEach((_, i) => {
+            const d = document.createElement('button');
+            d.className = 'dot' + (i === idx ? ' active' : '');
+            d.setAttribute('aria-label', `Media ${i + 1}`);
+            d.addEventListener( 'click', () => goTo(i));
+            dotsWrap.appendChild(d);
+        });
+    }
+
+    function goTo(n: number) {
+        idx = (n + media.length) % media.length;
+        renderMedia(media[idx]);
+        renderDots();
+    }
+
+    function openModal(data: {
+        title: string;
+        description: string;
+        tech: string[];
+        github?: string;
+        live?: string;
+        media?: string[];
+    }) {
+        media = (data.media ?? []).filter(Boolean);
+        idx = 0;
+
+        // media section visibility
+        if (media.length > 0) {
+            section.removeAttribute('hidden');
+            renderMedia(media[0]);
+            renderDots();
+            prevBtn.style.display = media.length > 1 ? '' : 'none';
+            nextBtn.style.display = media.length > 1 ? '' : 'none';
+        } else {
+            section.setAttribute('hidden', '');
+            display.innerHTML = '';
+            dotsWrap.innerHTML = '';
+        }
+
+        // info
+        titleEl.textContent = data.title;
+        descEl.textContent  = data.description;
+
+        techEl.innerHTML = data.tech
+            .map(t => `<span class="pill mono">${t}</span>`)
+            .join('');
+
+        linksEl.innerHTML = '';
+        if (data.github) {
+            linksEl.innerHTML += `<a href="${data.github}" target="_blank" rel="noopener"><i class="bi bi-github"></i> github</a>`;
+        }
+        if (data.live) {
+            linksEl.innerHTML += `<a href="${data.live}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> live</a>`;
+        }
+
+        overlay.removeAttribute('hidden');
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => overlay.classList.add('open'));
+    }
+
+    function closeModal() {
+        overlay.classList.remove('open');
+        const done = () => {
+            clearTimeout(fallback);
+            overlay.setAttribute('hidden', '');
+            document.body.style.overflow = '';
+            display.innerHTML = '';
+        };
+        // fallback in case transitionend never fires (rapid clicks, etc.)
+        const fallback = setTimeout(done, 350);
+        overlay.addEventListener('transitionend', done, { once: true });
+    }
+
+    // event wiring
+    prevBtn.addEventListener('click', () => goTo(idx - 1));
+    nextBtn.addEventListener('click', () => goTo(idx + 1));
+    document.getElementById('modal-close')!.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', (e) => {
+        if (!overlay.hasAttribute('hidden')) {
+            if (e.key === 'Escape')     closeModal();
+            if (e.key === 'ArrowLeft')  goTo(idx - 1);
+            if (e.key === 'ArrowRight') goTo(idx + 1);
+        }
+    });
+
+    // delegate clicks from any card with data-project
+    document.addEventListener('click', (e) => {
+        const card = (e.target as Element).closest('[data-project]');
+        if (!card) return;
+        if ((e.target as Element).closest('a')) return; // let links through
+        openModal(JSON.parse((card as HTMLElement).dataset.project!));
+    });
+</script>
+
+<style lang="scss">
+    .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        opacity: 0;
+        pointer-events: none; // never block clicks unless actually open
+        transition: opacity 0.25s ease;
+
+        &.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    }
+
+    .panel {
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 1.5rem;
+        width: 100%;
+        max-width: 52rem;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 2rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        transform: translateY(12px);
+        transition: transform 0.25s ease;
+
+        .overlay.open & { transform: translateY(0); }
+
+        @media (max-width: 640px) {
+            padding: 1.25rem;
+            border-radius: 1.25rem;
+        }
+    }
+
+    .close-btn {
+        position: fixed;
+        top: 1.25rem;
+        right: 1.25rem;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+        z-index: 10;
+        transition: background 0.2s ease, color 0.2s ease;
+
+        &:hover { background: var(--border); color: var(--text); }
+    }
+
+    .media-section {
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+        background: var(--surface-2);
+        aspect-ratio: 16 / 9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &[hidden] { display: none; }
+    }
+
+    .media-display {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img, video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 0;
+            padding: 0;
+            margin: 0;
+        }
+    }
+
+    .arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background: rgba(13, 13, 21, 0.7);
+        border: 1px solid var(--border);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.2s ease;
+        backdrop-filter: blur(4px);
+
+        &:hover { background: var(--surface); }
+        &.left  { left: 0.75rem; }
+        &.right { right: 0.75rem; }
+    }
+
+    .dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.4rem;
+
+        .dot {
+            width: 0.45rem;
+            height: 0.45rem;
+            border-radius: 50%;
+            background: var(--border);
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+
+            &.active {
+                background: var(--text-muted);
+                transform: scale(1.3);
+            }
+            &:hover { background: var(--text-dim); }
+        }
+    }
+
+    .info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        h3 {
+            font-size: 1.75rem;
+            text-transform: lowercase;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+    }
+
+    .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+
+        .pill {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+    }
+
+    .ext-links {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+
+        a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.4rem 0.9rem;
+            transition: all 0.2s ease;
+
+            &:hover {
+                color: var(--text);
+                border-color: var(--text-dim);
+            }
+        }
+    }
+</style>

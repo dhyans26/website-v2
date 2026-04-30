@@ -1,0 +1,36 @@
+# role, org, period, description, icon (Bootstrap Icons class), accent
+
+hackathons:
+  - name: Undercity
+    location: San Francisco, CA
+    period: "july 2025"
+    description: ""
+    image: ""
+  - name: Campfire Flagship
+    location: Los Angeles, CA
+    period: "feb 2026"
+    description: ""
+    image: ""
+  - name: Scrapyard Boston
+    location: Boston, MA
+    period: "march 2025"
+    description: ""
+    image: ""
+  - name: Daydream Boston
+    location: Boston, MA
+    period: "september 2025"
+    description: ""
+    image: ""
+  - name: Hacknight
+    location: Cambridge, MA
+    period: "may 2025"
+    description: ""
+    image: ""
+
+experiences:
+- role: clubs engineer
+  org: The Hack Foundation
+  period: "2025 – present"
+  description: "building + maintaining the infra behind the clubs program! Start your own <a href=\"https://apply.hackclub.com\" target=\"_blank\" rel=\"noopener noreferrer\">here</a>"
+  icon: bi-lightning-fill
+  accent: red

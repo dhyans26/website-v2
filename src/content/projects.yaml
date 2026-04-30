@@ -1,22 +1,49 @@
-- title: 3d snake
-  description: Snake ported to the third dimension! Made at Hack Club's Undercity Hackathon
+# media: list paths relative to /public — images or videos (.mp4/.webm)
+# accent: card hover color — red | blue | yellow | purple | pink | green
+
+- title: 3d Snake
+  description: Snake ported to the third dimension!
+    A cool custom 3D game console that spins to face the user in the age-old nostalgic classic game of Snake!
+    Made at Hack Club's Undercity Hackathon at GitHub hq (San Francisco),
+    it was the most voted-on project in demos and won a podium position after final votes.
   tech:
     - Hardware
     - Raspberry Pi
-  github: https://github.com/bluelightning26/3d-snake
-  live: https://github.com/bluelightning26/3d-snake/readme.md
+    - Fusion 360
+  github: https://github.com/dhyans26/3d-snake
+  live: https://github.com/dhyans26/3d-snake/readme.md
+  pinned: true
+  accent: blue
+  media:
+    - /projects/3dSnakePoster.webp
+    - /projects/InternY.webp
 
 - title: DhyanAi
-  description: is ChatGPT blocked in your school? Run this custom client!
+  description: An AI aggregate chat portal that's unblocked, with a custom admin panel and statistics. Designed for use with peers.
+    Based on LibreAI, this is a password-protected way to manage and audit AI use at scale while keeping your data private from school administrators.
+    Currently closed source, url will be made public and it will be open sourced at the end of the school year to help protect academic integrity.
+  live:
   tech:
     - Astro
     - TypeScript
-  github: https://github.com/Bluelightning26/school-ai
+  github: https://github.com/dhyans26/dhyan-ai
+  pinned: true
+  accent: purple
+  media:
+    - /projects/InternR.webp
+    - /projects/InternY.webp
 
 - title: BluBoard
-  description: A custom 75% keyboard!
+  description: A custom 75% keyboard! Has two rotary encoders with switches as an extra. Powered using a Pi Pico running KMK firmware.
+    Case designed in OnShape and 3d printed with a Bambu Lab A1 Mini, the PCB was designed fully in KiCad. It was the second keyboard I designed after BluPad, a macropad.
   tech:
     - KiCad
     - OnShape
     - KMK
   github: https://github.com/Bluelightning26/BluBoard
+  pinned: true
+  accent: yellow
+  media:
+    - /projects/bluBoardPcb.webp
+    - /projects/bluBoardSide.webp
+    - /projects/bluBoardTopDown.webp

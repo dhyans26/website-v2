@@ -1,41 +1,311 @@
 ---
-// landing for home page
 import { INFO } from '../consts';
+import { readdirSync, readFileSync, existsSync } from 'fs';
+import { parse } from 'yaml';
+
+// Collect every image in public/pfp/
+const pfpFiles = readdirSync('public/pfp')
+    .filter(f => /\.(jpe?g|png|webp|avif|gif)$/i.test(f))
+    .sort(); // stable order so SSR default is deterministic
+
+// Merge with per-file config from src/content/pfp.yaml
+// Each value is either a plain number (weight only) or { weight, caption }
+type PfpEntry = number | { weight?: number; caption?: string };
+const configMap: Record<string, PfpEntry> = existsSync('src/content/pfp.yaml')
+    ? (parse(readFileSync('src/content/pfp.yaml', 'utf-8')) ?? {})
+    : {};
+
+const pfpList = pfpFiles.map(f => {
+    const entry = configMap[f];
+    const w      = typeof entry === 'number' ? entry : (entry?.weight  ?? 1);
+    const caption = typeof entry === 'object' ? (entry?.caption ?? f)  : f;
+    return { src: `/pfp/${f}`, w, caption };
+});
+
+// No-JS / pre-hydration fallback: show the highest-weight photo + its caption
+const defaultPfp = pfpList.reduce((best, p) => p.w >= best.w ? p : best, pfpList[0]);
 ---
-<div style="display: flex; align-items: center; justify-content: space-between;">
-    <div>
-        <h1>Hello!</h1>
-        <h1>I'm {INFO.name}</h1>
-        <h2>{INFO.education} {INFO.gradeLevel} from {INFO.location}</h2>
+
+<section class="hero container">
+    <div class="intro">
+        <span class="eyebrow mono">// hi there</span>
+        <h1 id="hero-heading" data-prefix="I'm " data-name={INFO.name} aria-label={`I'm ${INFO.name}`}>
+            I'm <span class="accent">{INFO.name}</span><span class="cursor" aria-hidden="true"></span>
+        </h1>
+        <p class="lede">
+            A {INFO.education.toLowerCase()} {INFO.gradeLevel.toLowerCase()} from the {INFO.location} area,
+            currently tinkering <a href="https://hackclub.com"><span class="hl">@ The Hack&nbsp;Foundation</span></a> as an engineer on the clubs program.
+            My interests primarily lie in sports, aerospace, and engineering.
+        </p>
+        <div class="cta">
+            <a href="/projects/" class="btn primary">
+                see my projects <i class="bi bi-arrow-right"></i>
+            </a>
+            <a href={`mailto:${INFO.email}`} class="btn ghost">
+                <i class="bi bi-envelope"></i> say hi
+            </a>
+        </div>
     </div>
-    <img src="/dhyan.jpg" alt="Astro Logo" class="profile-img" />
-</div>
+
+    <div class="avatar">
+        <img
+            id="pfp"
+            src={defaultPfp.src}
+            alt={INFO.name}
+            data-pfp={JSON.stringify(pfpList)}
+        />
+        <span class="status mono">
+            <span class="planet" aria-label="saturn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 20" aria-hidden="true">
+                    <defs>
+                        <radialGradient id="lp-body" cx="38%" cy="32%" r="65%">
+                            <stop offset="0%"   stop-color="#e0d5ff"/>
+                            <stop offset="50%"  stop-color="#9b7fe8"/>
+                            <stop offset="100%" stop-color="#4e2fa0"/>
+                        </radialGradient>
+                        <linearGradient id="lp-ring" x1="1" y1="10" x2="27" y2="10" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%"   stop-color="#ffee99" stop-opacity="0"/>
+                            <stop offset="28%"  stop-color="#ffee99" stop-opacity="0.9"/>
+                            <stop offset="72%"  stop-color="#ffc399" stop-opacity="0.9"/>
+                            <stop offset="100%" stop-color="#ffc399" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- back ring arc (upper half, drawn behind planet) -->
+                    <path d="M 1,10 A 13,4 0 0 0 27,10" fill="none" stroke="url(#lp-ring)" stroke-width="2.5" opacity="0.4"/>
+
+                    <!-- planet body -->
+                    <circle cx="14" cy="10" r="7.5" fill="url(#lp-body)"/>
+
+                    <!-- subtle atmosphere bands -->
+                    <ellipse cx="14" cy="8"  rx="7.3" ry="1.7" fill="rgba(255,255,255,0.07)"/>
+                    <ellipse cx="14" cy="12" rx="7.3" ry="1.4" fill="rgba(0,0,0,0.1)"/>
+
+                    <!-- specular highlight -->
+                    <circle cx="11.5" cy="7.5" r="2.2" fill="rgba(255,255,255,0.22)"/>
+
+                    <!-- front ring arc (lower half, drawn in front of planet) -->
+                    <path d="M 1,10 A 13,4 0 0 1 27,10" fill="none" stroke="url(#lp-ring)" stroke-width="2.5"/>
+                </svg>
+            </span> <span id="pfp-caption">{defaultPfp.caption}</span>
+        </span>
+    </div>
+</section>
 
 <style lang="scss">
+    .hero {
+        padding: 4rem 1.5rem 6rem;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 4rem;
+        align-items: center;
 
-  .profile-img {
-    border-radius: 50%;
-    width: 32rem;
-    height: 32rem;
-    margin-left: 1rem;
-    margin-top: 3rem;
-    margin-right: 3rem;
-    box-sizing: border-box;
-    transition: all 0.5s ease-in-out;
-
-    &:hover {
-      transform: rotate(7deg);
-      box-shadow: 0 0 2.5rem 5rem var(--yellow-40);
-      border: 0.5rem solid var(--yellow-40);
-      transition: all 0.5s ease-in-out;
+        @media (max-width: 900px) {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+            padding: 2rem 1.5rem 4rem;
+            text-align: left;
+        }
     }
 
-    @media (max-width: 1000px) {
-    width: 24rem;
-    height: 24rem;
+    .eyebrow {
+        display: inline-block;
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        margin-bottom: 1.25rem;
     }
-  }
 
+    h1 {
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
 
+    .accent {
+        color: var(--accent);
+    }
 
+    .cursor {
+        display: inline-block;
+        width: 3px;
+        height: 0.82em;
+        background: var(--text);
+        border-radius: 1px;
+        vertical-align: middle;
+        margin-left: 4px;
+        animation: blink 0.6s steps(1) infinite;
+        transition: opacity 0.4s ease;
+
+        &.done { animation: none; opacity: 0; }
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0; }
+    }
+
+    .lede {
+        font-size: 1.15rem;
+        max-width: 34rem;
+        margin-bottom: 2rem;
+    }
+
+    .hl {
+        color: var(--text);
+        font-weight: 500;
+    }
+
+    .cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 999px;
+        font-size: 1rem;
+        font-weight: 500;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+
+        &.primary {
+            background: var(--accent);
+            color: var(--bg);
+
+            &:hover {
+                background: var(--yellow);
+                box-shadow: 0 0 0 6px var(--yellow-40);
+            }
+        }
+
+        &.ghost {
+            border-color: var(--border);
+            color: var(--text);
+
+            &:hover {
+                border-color: var(--text);
+                color: var(--text);
+            }
+        }
+    }
+
+    .avatar {
+        position: relative;
+        justify-self: center;
+
+        img {
+            width: min(22rem, 80vw);
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 2rem;
+            border: 2px solid var(--border);
+            transition: transform 0.4s ease, border-color 0.4s ease;
+
+            &:hover {
+                transform: rotate(-2deg) scale(1.02);
+                border-color: var(--accent);
+            }
+        }
+    }
+
+    .status {
+        position: absolute;
+        bottom: -0.75rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.9rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    .planet {
+        display: inline-flex;
+        align-items: center;
+        animation: float 4s ease-in-out infinite;
+
+        svg {
+            width: 1.5rem;
+            height: auto;
+            overflow: visible;
+            transform: rotate(360-20deg);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50%       { transform: translateY(-1px); }
+    }
 </style>
+
+<script>
+    // ── typewriter ──────────────────────────────────────────────
+    const heading = document.getElementById('hero-heading') as HTMLElement | null;
+    if (heading) {
+        const prefix = heading.dataset.prefix ?? "I'm ";
+        const name   = heading.dataset.name   ?? '';
+        const cursor = heading.querySelector('.cursor') as HTMLElement | null;
+
+        // Build two target spans and clear the heading content
+        const prefixSpan = document.createElement('span');
+        const nameSpan   = document.createElement('span');
+        // inline styles so scoped CSS never interferes:
+        // start white, transition to red after typing finishes
+        nameSpan.style.color      = 'var(--text)';
+        nameSpan.style.transition = 'color 0.7s ease';
+        heading.innerHTML = '';
+        heading.appendChild(prefixSpan);
+        heading.appendChild(nameSpan);
+        if (cursor) heading.appendChild(cursor);
+
+        const full = prefix + name;
+        let i = 0;
+
+        function tick() {
+            if (i < prefix.length) {
+                prefixSpan.textContent = full.slice(0, i + 1);
+            } else {
+                prefixSpan.textContent = prefix;
+                nameSpan.textContent   = full.slice(prefix.length, i + 1);
+            }
+            i++;
+            if (i < full.length) {
+                setTimeout(tick, 105);
+            } else {
+                // let the last character land, then bloom to red and fade the cursor
+                setTimeout(() => {
+                    nameSpan.style.color = 'var(--accent)';
+                    setTimeout(() => cursor?.classList.add('done'), 700);
+                }, 300);
+            }
+        }
+
+        setTimeout(tick, 200); // breath before starting
+    }
+
+    // ── pfp weighted random ──────────────────────────────────────
+    const img     = document.getElementById('pfp')         as HTMLImageElement | null;
+    const caption = document.getElementById('pfp-caption') as HTMLElement      | null;
+    if (img) {
+        const list: { src: string; w: number; caption: string }[] =
+            JSON.parse(img.dataset.pfp ?? '[]');
+        if (list.length > 1) {
+            // Weighted random pick
+            const total = list.reduce((s, p) => s + p.w, 0);
+            let r = Math.random() * total;
+            const picked = list.find(p => (r -= p.w) <= 0) ?? list[list.length - 1];
+            if (picked.src !== img.src) img.src = picked.src;
+            if (caption) caption.textContent = picked.caption;
+        }
+    }
+</script>

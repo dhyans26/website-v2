@@ -1,36 +1,47 @@
 ---
-import Base from '../components/Base.astro';
 import '../styles/globals.scss';
+// self-hosted fonts — no CDN round-trips
+import '@fontsource-variable/space-grotesk';
+import '@fontsource/jetbrains-mono/400.css';
+import '@fontsource/jetbrains-mono/500.css';
+// self-hosted icons
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import ProjectModal from '../components/ProjectModal.astro';
+import StarField from '../components/StarField.astro';
 
 const { pageTitle } = Astro.props;
-
 ---
 
 <html lang="en">
     <head>
-        <Base />
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width" initial-scale="1"/>
-        <link rel="icon" type="image/png" href="../assets/favicon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
-        <!-- Bootstrap Icons -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-        </style>
-
-        <meta name="generator" content={Astro.generator} >
-        <title>{pageTitle}</title>
+        <meta name="generator" content={Astro.generator} />
+        <title>Dhyan: {pageTitle}</title>
+        <!-- restore accent theme before first paint to avoid flash -->
+        <script is:inline>
+            (function(){var a=localStorage.getItem('accent');if(a)document.documentElement.dataset.accent=a;})();
+        </script>
     </head>
 
     <body>
+        <StarField />
         <Navigation />
-
-        <slot />
-
+        <main>
+            <slot />
+        </main>
         <Footer />
+        <ProjectModal />
     </body>
 </html>
+
+<style is:global>
+    main {
+        min-height: calc(100vh - 14rem);
+    }
+</style>

@@ -1,0 +1,60 @@
+# note for future self,
+#to change countries on the mini-globe
+#visit components/WorldGlobe.astro and the # in const VISITED are the country codes
+visited-usa:
+  - Alabama
+  - Arizona
+  - Arkansas
+  - California
+  - Colorado
+  - Connecticut
+  - Delaware
+  - Florida
+  - Georgia
+  - Illinois
+  - Indiana
+  - Iowa
+  - Kansas
+  - Kentucky
+  - Louisiana
+  - Maine
+  - Maryland
+  - Massachusetts #woo hoo
+  - Michigan
+  - Minnesota
+  - Mississippi
+  - Missouri
+  - Nebraska
+  - Nevada
+  - New Hampshire
+  - New Jersey
+  - New Mexico
+  - New York
+  - North Carolina
+  - Ohio
+  - Oklahoma
+  - Pennsylvania
+  - Rhode Island
+  - South Carolina
+  - South Dakota
+  - Tennessee
+  - Texas
+  - Utah
+  - Vermont
+  - Virginia
+  - Washington
+  - West Virginia
+  - Wisconsin
+
+visited-usa-not:
+  - Alaska
+  - Hawaii
+  - Idaho
+  - Montana
+  - North Dakota
+  - Oregon
+  - Wyoming
+
+visited-canada:
+  - Quebec
+  - Ontario

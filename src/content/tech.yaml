@@ -1,0 +1,491 @@
+# Logo carousel — tools displayed on the home page.
+# slug: SimpleIcons slug (https://simpleicons.org)
+# color: hex without the # — pick a color visible on a dark background
+
+# ── languages ──────────────────────────────────────────────────
+- name: C
+  slug: c
+  color: "A8B9CC"
+  href: https://www.open-std.org/jtc1/sc22/wg14/
+
+- name: CSS3
+  slug: css
+  color: "1572B6"
+  href: https://www.w3.org/Style/CSS/
+
+- name: HTML5
+  slug: html5
+  color: "E34F26"
+  href: https://html.spec.whatwg.org/
+
+- name: Java
+  slug: java #oracle why :Nooooo: :pensive:
+  color: "ED8B00"
+  href: https://www.java.com
+
+- name: JavaScript
+  slug: javascript
+  color: "F7DF1E"
+  href: https://developer.mozilla.org/docs/Web/JavaScript
+
+- name: Kotlin
+  slug: kotlin
+  color: "7F52FF"
+  href: https://kotlinlang.org
+
+- name: Markdown
+  slug: markdown
+  color: "FFFFFF"
+  href: https://daringfireball.net/projects/markdown/
+
+- name: Python
+  slug: python
+  color: "3776AB"
+  href: https://www.python.org
+
+- name: TypeScript
+  slug: typescript
+  color: "3178C6"
+  href: https://www.typescriptlang.org
+
+# ── frontend ────────────────────────────────────────────────────
+- name: Astro
+  slug: astro
+  color: "FF5D01"
+  href: https://astro.build
+
+- name: Next.js
+  slug: nextdotjs
+  color: "FFFFFF"
+  href: https://nextjs.org
+
+- name: React
+  slug: react
+  color: "61DAFB"
+  href: https://react.dev
+
+- name: Sass
+  slug: sass
+  color: "CC6699"
+  href: https://sass-lang.com
+
+- name: Svelte
+  slug: svelte
+  color: "FF3E00"
+  href: https://svelte.dev
+
+- name: SvelteKit
+  slug: svelte
+  color: "FF3E00"
+  href: https://kit.svelte.dev
+
+- name: Tailwind CSS
+  slug: tailwindcss
+  color: "06B6D4"
+  href: https://tailwindcss.com
+
+# ── backend / runtime ───────────────────────────────────────────
+- name: Bun
+  slug: bun
+  color: "FBF0DF"
+  href: https://bun.sh
+
+- name: Gradle
+  slug: gradle
+  color: "02CCB3"
+  href: https://gradle.org
+
+- name: Node.js
+  slug: nodedotjs
+  color: "339933"
+  href: https://nodejs.org
+
+# ── databases ───────────────────────────────────────────────────
+- name: MongoDB
+  slug: mongodb
+  color: "47A248"
+  href: https://www.mongodb.com
+
+- name: MySQL
+  slug: mysql
+  color: "4479A1"
+  href: https://www.mysql.com
+
+- name: PostgreSQL
+  slug: postgresql
+  color: "4169E1"
+  href: https://www.postgresql.org
+
+# ── AI / data ───────────────────────────────────────────────────
+- name: Anaconda
+  slug: anaconda
+  color: "44A833"
+  href: https://www.anaconda.com
+
+- name: Keras
+  slug: keras
+  color: "D00000"
+  href: https://keras.io
+
+- name: NumPy
+  slug: numpy
+  color: "4DABCF"
+  href: https://numpy.org
+
+- name: Pandas
+  slug: pandas
+  color: "E70488"
+  href: https://pandas.pydata.org
+
+- name: PyTorch
+  slug: pytorch
+  color: "EE4C2C"
+  href: https://pytorch.org
+
+- name: TensorFlow
+  slug: tensorflow
+  color: "FF6F00"
+  href: https://www.tensorflow.org
+
+# ── package managers ────────────────────────────────────────────
+- name: npm
+  slug: npm
+  color: "CB3837"
+  href: https://www.npmjs.com
+
+- name: pnpm
+  slug: pnpm
+  color: "F69220"
+  href: https://pnpm.io
+
+- name: Yarn
+  slug: yarn
+  color: "2C8EBB"
+  href: https://yarnpkg.com
+
+# ── devtools ────────────────────────────────────────────────────
+- name: dotenv
+  slug: dotenv
+  color: "ECD53F"
+  href: https://dotenv.org
+
+- name: Figma
+  slug: figma
+  color: "F24E1E"
+  href: https://figma.com
+
+- name: GIMP
+  slug: gimp
+  color: "5C5543"
+  href: https://www.gimp.org
+
+- name: GitHub
+  slug: github
+  color: "FFFFFF"
+  href: https://github.com
+
+- name: Prettier
+  slug: prettier
+  color: "F7B93E"
+  href: https://prettier.io
+
+- name: Vite
+  slug: vite
+  color: "646CFF"
+  href: https://vitejs.dev
+
+# ── infrastructure / hosting ────────────────────────────────────
+- name: Airtable
+  slug: airtable
+  color: "18BFFF"
+  href: https://airtable.com
+
+- name: Cloudflare
+  slug: cloudflare
+  color: "F38020"
+  href: https://www.cloudflare.com
+
+- name: Docker
+  slug: docker
+  color: "2496ED"
+  href: https://www.docker.com
+
+- name: Firebase
+  slug: firebase
+  color: "FFCA28"
+  href: https://firebase.google.com
+
+- name: Netlify
+  slug: netlify
+  color: "00C7B7"
+  href: https://www.netlify.com
+
+- name: Pi-hole
+  slug: pihole
+  color: "96060C"
+  href: https://pi-hole.net
+
+- name: Vercel
+  slug: vercel
+  color: "FFFFFF"
+  href: https://vercel.com
+
+# ── hardware / embedded ─────────────────────────────────────────
+- name: KiCad
+  slug: kicad
+  color: "314CB0"
+  href: https://www.kicad.org
+
+- name: Raspberry Pi
+  slug: raspberrypi
+  color: "A22846"
+  href: https://www.raspberrypi.com
+
+# ── privacy / networking ────────────────────────────────────────
+- name: 1.1.1.1
+  slug: 1dot1dot1dot1
+  color: "F48120"
+  href: https://1.1.1.1
+
+- name: Aseprite
+  slug: aseprite
+  color: "7D929E"
+  href: https://www.aseprite.org
+
+- name: Tor Browser
+  slug: torbrowser
+  color: "7D4698"
+  href: https://www.torproject.org/download/
+
+# ── static site generators ──────────────────────────────────────
+- name: Hugo
+  slug: hugo
+  color: "FF4088"
+  href: https://gohugo.io
+
+- name: Jekyll
+  slug: jekyll
+  color: "CC0000"
+  href: https://jekyllrb.com
+
+# ── AI tools ────────────────────────────────────────────────────
+- name: Anthropic
+  slug: anthropic
+  color: "D4A27F"
+  href: https://anthropic.com
+
+- name: Claude
+  slug: claude
+  color: "D97757"
+  href: https://claude.ai
+
+- name: GitHub Copilot
+  slug: githubcopilot
+  color: "FFFFFF"
+  href: https://github.com/features/copilot
+
+- name: Hugging Face
+  slug: huggingface
+  color: "FFD21E"
+  href: https://huggingface.co
+
+- name: Ollama
+  slug: ollama
+  color: "FFFFFF"
+  href: https://ollama.com
+
+# ── IDEs / editors ──────────────────────────────────────────────
+- name: IntelliJ IDEA
+  slug: intellijidea
+  color: "FE315D"
+  href: https://www.jetbrains.com/idea/
+
+- name: JetBrains
+  slug: jetbrains
+  color: "FFFFFF"
+  href: https://www.jetbrains.com
+
+- name: PyCharm
+  slug: pycharm
+  color: "21D789"
+  href: https://www.jetbrains.com/pycharm/
+
+- name: WebStorm
+  slug: webstorm
+  color: "00CDD7"
+  href: https://www.jetbrains.com/webstorm/
+
+# ── hardware / making ───────────────────────────────────────────
+- name: Bambu Lab
+  slug: bambulab
+  color: "00AE42"
+  href: https://bambulab.com
+
+# ── apps / daily drivers ────────────────────────────────────────
+- name: Android
+  slug: android
+  color: "3DDC84"
+  href: https://www.android.com
+
+- name: Arc
+  slug: arc
+  color: "FCBFBD"
+  href: https://arc.net
+
+- name: DuckDuckGo
+  slug: duckduckgo
+  color: "DE5833"
+  href: https://duckduckgo.com
+
+- name: Ghostty
+  slug: ghostty
+  color: "C75000"
+  href: https://ghostty.org
+
+- name: Google Calendar
+  slug: googlecalendar
+  color: "4285F4"
+  href: https://calendar.google.com
+
+- name: Hack Club
+  slug: hackclub
+  color: "EC3750"
+  href: https://hackclub.com
+
+- name: macOS
+  slug: macos
+  color: "FFFFFF"
+  href: https://www.apple.com/macos/
+
+- name: ProtonVPN
+  slug: protonvpn
+  color: "6D4AFF"
+  href: https://protonvpn.com
+
+- name: Toggl Track
+  slug: toggl
+  color: "E57CD8"
+  href: https://toggl.com
+
+- name: WakaTime
+  slug: wakatime
+  color: "FFFFFF"
+  href: https://wakatime.com
+
+- name: Yubico
+  slug: yubico
+  color: "84BD00"
+  href: https://www.yubico.com
+
+# ── languages (additions) ───────────────────────────────────────
+- name: JSON
+  slug: json
+  color: "FFFFFF"
+  href: https://www.json.org
+
+- name: Ruby
+  slug: ruby
+  color: "CC342D"
+  href: https://www.ruby-lang.org
+
+- name: SVG
+  slug: svg
+  color: "FFB13B"
+  href: https://www.w3.org/Graphics/SVG/
+
+- name: TOML
+  slug: toml
+  color: "9C4121"
+  href: https://toml.io
+
+- name: YAML
+  slug: yaml
+  color: "CB171E"
+  href: https://yaml.org
+
+# ── frontend (additions) ─────────────────────────────────────────
+- name: A-Frame
+  slug: aframe
+  color: "EF2D5E"
+  href: https://aframe.io
+
+- name: Bootstrap
+  slug: bootstrap
+  color: "7952B3"
+  href: https://getbootstrap.com
+
+- name: Vue.js
+  slug: vuedotjs
+  color: "4FC08D"
+  href: https://vuejs.org
+
+# ── devtools (additions) ─────────────────────────────────────────
+- name: GitBook
+  slug: gitbook
+  color: "3884FF"
+  href: https://www.gitbook.com
+
+- name: GitHub Actions
+  slug: githubactions
+  color: "2088FF"
+  href: https://github.com/features/actions
+
+- name: GitHub Pages
+  slug: githubpages
+  color: "FFFFFF"
+  href: https://pages.github.com
+
+- name: GNU Bash
+  slug: gnubash
+  color: "4EAA25"
+  href: https://www.gnu.org/software/bash/
+
+- name: Pixlr
+  slug: pixlr
+  color: "FF3385"
+  href: https://pixlr.com
+
+- name: QMK
+  slug: qmk
+  color: "1F8FEB"
+  href: https://qmk.fm
+
+# ── apps (additions) ─────────────────────────────────────────────
+- name: Proton
+  slug: proton
+  color: "6D4AFF"
+  href: https://proton.me
+
+# ── static site generators (additions) ──────────────────────────
+- name: Godot Engine
+  slug: godotengine
+  color: "478CBF"
+  href: https://godotengine.org
+
+# ── languages (more additions) ──────────────────────────────────
+- name: C++
+  slug: cplusplus
+  color: "00599C"
+  href: https://isocpp.org
+
+# ── hardware / embedded (additions) ─────────────────────────────
+- name: Arduino
+  slug: arduino
+  color: "00979D"
+  href: https://www.arduino.cc
+
+# ── apps / daily drivers (additions) ────────────────────────────
+- name: Google Authenticator
+  slug: googleauthenticator
+  color: "4285F4"
+  href: https://googleauthenticator.net
+
+- name: Homebrew
+  slug: homebrew
+  color: "FBB040"
+  href: https://brew.sh
+
+- name: WireGuard
+  slug: wireguard
+  color: "88171A"
+  href: https://www.wireguard.com

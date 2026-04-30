@@ -1,0 +1,29 @@
+# Each entry is either:
+#   filename: weight          (caption falls back to the filename)
+#   filename:
+#     weight: N
+#     caption: "your text"
+#
+# Higher weight = shows up more often. Unlisted files default to weight 1.
+# Use .webp filenames — drop originals in public/pfp/ as .webp only.
+
+dhyan.webp:
+  weight: 3
+  caption:
+
+dhyan2.webp:
+  weight: 1
+  caption: "tongva park, santa monica"
+
+cfg_fun.webp:
+  weight: 4
+  caption: "post-flagship fun @ la"
+
+cfg_waymo.webp:
+  weight: 3
+  caption: "cfg waymo"
+
+##template
+# name.webp:
+#   weight: 0
+#   caption: ""

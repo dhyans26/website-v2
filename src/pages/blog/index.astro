@@ -1,0 +1,206 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout pageTitle="Blog">
+    <section class="void" id="void">
+
+        <div class="layer" id="l1">
+            <div class="debris d1"></div>
+            <div class="debris d2"></div>
+            <div class="debris d3"></div>
+            <div class="debris d4"></div>
+        </div>
+
+        <div class="layer" id="l3">
+            <div class="content">
+                <span class="eyebrow mono">// blog</span>
+                <h1 class="headline">
+                    coming <span class="accent-word">soon</span>
+                </h1>
+                <p class="desc">
+                    (will be on a subdomain whenever i write something fun enough)<br />
+                    on the Hack Club Slack? find me over at <a href="https://hackclub.enterprise.slack.com/archives/C08TAMRKDQ8" target="_blank" rel="noopener noreferrer">#dhyans-box</a>!
+                </p>
+                <a href="/" class="btn">
+                    <i class="bi bi-arrow-left"></i> back to home
+                </a>
+            </div>
+        </div>
+
+    </section>
+</BaseLayout>
+
+<style lang="scss">
+    .void {
+        position: relative;
+        min-height: calc(100vh - 14rem);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .layer {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        will-change: transform;
+    }
+
+    .debris {
+        position: absolute;
+        border-radius: 2px;
+        background: var(--border);
+        opacity: 0.55;
+
+        &.d1 {
+            width: 6px; height: 6px; border-radius: 50%;
+            top: 15%; left: 8%;
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+            animation: float-d 7s ease-in-out infinite;
+        }
+        &.d2 {
+            width: 4px; height: 10px;
+            top: 70%; left: 14%;
+            transform: rotate(35deg);
+            animation: float-d 9s ease-in-out infinite 1s;
+        }
+        &.d3 {
+            width: 8px; height: 8px; border-radius: 50%;
+            top: 25%; right: 18%;
+            background: var(--blue);
+            box-shadow: 0 0 10px var(--blue);
+            opacity: 0.4;
+            animation: float-d 11s ease-in-out infinite 2s;
+        }
+        &.d4 {
+            width: 5px; height: 5px;
+            top: 78%; right: 22%;
+            transform: rotate(-20deg);
+            animation: float-d 8s ease-in-out infinite 3s;
+        }
+    }
+
+    @keyframes float-d {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50%       { transform: translateY(-12px) rotate(15deg); }
+    }
+
+    .content {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+        padding: 0 1.5rem;
+    }
+
+    .eyebrow {
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        letter-spacing: 0.06em;
+    }
+
+    .headline {
+        font-size: clamp(3.5rem, 12vw, 7rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        margin: 0;
+        color: var(--text);
+
+        .accent-word {
+            color: var(--accent);
+            text-shadow:
+                0 0 40px color-mix(in srgb, var(--accent) 60%, transparent),
+                0 0 80px color-mix(in srgb, var(--accent) 25%, transparent);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% { text-shadow:
+            0 0 30px color-mix(in srgb, var(--accent) 55%, transparent),
+            0 0 70px color-mix(in srgb, var(--accent) 20%, transparent); }
+        50%       { text-shadow:
+            0 0 55px color-mix(in srgb, var(--accent) 75%, transparent),
+            0 0 110px color-mix(in srgb, var(--accent) 35%, transparent); }
+    }
+
+    .desc {
+        color: var(--text-muted);
+        font-size: 1rem;
+        line-height: 1.65;
+        max-width: 32rem;
+        margin: 0;
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            &:hover { text-decoration: underline; }
+        }
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        padding: 0.75rem 1.4rem;
+        border-radius: 999px;
+        font-size: 1rem;
+        font-weight: 500;
+        border: 2px solid transparent;
+        background: var(--accent);
+        color: var(--bg);
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: var(--yellow);
+            color: var(--bg);
+            box-shadow: 0 0 0 6px color-mix(in srgb, var(--yellow) 25%, transparent);
+        }
+    }
+</style>
+
+<script>
+    const void_el = document.getElementById('void')!;
+    const layers = [
+        { el: document.getElementById('l1')!, rx: 0.045, ry: 0.045 },
+        { el: document.getElementById('l3')!, rx: 0.008, ry: 0.008 },
+    ];
+
+    let tx = [0, 0], ty = [0, 0];
+    let cx = [0, 0], cy = [0, 0];
+
+    function tick() {
+        layers.forEach((l, i) => {
+            cx[i] += (tx[i] - cx[i]) * 0.07;
+            cy[i] += (ty[i] - cy[i]) * 0.07;
+            l.el.style.transform = `translate(${cx[i]}px, ${cy[i]}px)`;
+        });
+        requestAnimationFrame(tick);
+    }
+
+    void_el.addEventListener('mousemove', (e) => {
+        const r = void_el.getBoundingClientRect();
+        const mx = e.clientX - r.left  - r.width  / 2;
+        const my = e.clientY - r.top   - r.height / 2;
+        layers.forEach((l, i) => {
+            tx[i] = mx * l.rx;
+            ty[i] = my * l.ry;
+        });
+    });
+
+    void_el.addEventListener('mouseleave', () => {
+        layers.forEach((_, i) => { tx[i] = 0; ty[i] = 0; });
+    });
+
+    requestAnimationFrame(tick);
+</script>

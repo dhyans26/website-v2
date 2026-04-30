@@ -2,69 +2,259 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Landing from '../components/Landing.astro';
 import LogoCarousel from '../components/LogoCarousel.astro';
+import Experiences from '../components/Experiences.astro';
+
+import { readFileSync } from 'fs';
+import { parse } from 'yaml';
+
+const allProjects = parse(readFileSync('src/content/projects.yaml', 'utf-8'));
+const pinned = allProjects.filter((p: any) => p.pinned);
+
+const expData = parse(readFileSync('src/content/experiences.yaml', 'utf-8')) || {};
+const allExperiences = expData.experiences || [];
+const allHackathons = expData.hackathons || [];
+
+const isVideo = (src: string) => /\.(mp4|webm|mov|ogg)(\?|$)/i.test(src);
+const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
 ---
 
 <BaseLayout pageTitle="Home">
-	<Landing />
+    <Landing />
 
-	<div style="margin-top: 6rem;"></div>
+    <section class="featured container">
+        <header class="section-head">
+            <span class="mono tag">/ projects</span>
+            <div class="head-row">
+                <h2>things i've built</h2>
+                <a href="/projects/" class="view-all mono">
+                    view all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </header>
 
-	<div class="content">
-		<div class="grid">
-			<div class="grid-item">
-				<i class="bi bi-lightbulb" aria-label="Projects"></i>
-				<p>
-					Creating
-					<br><br><br>
-					I currently focus on creating projects that either help me expand my skillset, or make my life just a little bit easier
-				</p>
-			</div>
-			<div class="grid-item">
-				<i class="bi bi-journal-code" aria-label="Learning"></i>
-				<p>
-					Activities
-					<br><br><br>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-				</p>
-			</div>
-			<div class="grid-item">
-				<i class="bi bi-people" aria-label="Work"></i>
-				<p>
-					Experience
-					<br>Part time @ Hack Club
-					<br><br>
-					xyzabcdefg A global nonprofit network of high school makers where young people build the agency & the technical talent to think big & do big things in the world.
-				</p>
-			</div>
-		</div>
-	</div>
-	<LogoCarousel />
+        <div class="grid">
+            {pinned.map((p: any) => {
+                const media = cleanMedia(p.media);
+                const thumb = media[0];
+                const hasThumb = !!thumb;
+                return (
+                    <article
+                        class={`card card-${p.accent ?? 'red'}`}
+                        data-project={JSON.stringify({ title: p.title, description: p.description, tech: p.tech, github: p.github, live: p.live ?? null, media })}
+                    >
+                        {hasThumb && (
+                            <div class="thumb">
+                                {isVideo(thumb)
+                                    ? <video src={thumb} muted loop autoplay playsinline />
+                                    : <img src={thumb} alt={p.title} loading="lazy" />
+                                }
+                                <div class="thumb-overlay">
+                                    {media.length > 1 && <span class="count mono"><i class="bi bi-images"></i> {media.length}</span>}
+                                    <i class="bi bi-arrows-fullscreen expand-icon"></i>
+                                </div>
+                            </div>
+                        )}
+                        <div class="body">
+                            <div class="card-top">
+                                <div class="tech-tags">
+                                    {p.tech.map((t: string) => (
+                                        <span class="pill mono">{t}</span>
+                                    ))}
+                                </div>
+                                <div class="links">
+                                    <a href={p.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                                        <i class="bi bi-github"></i>
+                                    </a>
+                                    {p.live && (
+                                        <a href={p.live} target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                            <h3>{p.title}</h3>
+                            <p>{p.description}</p>
+                        </div>
+                    </article>
+                );
+            })}
+        </div>
+    </section>
+
+    <Experiences experiences={allExperiences} hackathons={allHackathons} />
+
+    <LogoCarousel />
 </BaseLayout>
 
 <style lang="scss">
-	.grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
-		gap: 2rem;
-		margin: 2rem;
+    .featured {
+        padding: 2rem 1.5rem 4rem;
+    }
 
-		@media (max-width: 800px) {
-			grid-template-columns: 1fr;
-			gap: 1.5rem;
-			margin: 1rem;
-		}
-	}
-	.grid-item {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		text-align: center;
+    .section-head {
+        margin-bottom: 2rem;
 
-		i {
-			font-size: 3rem;
-			margin-bottom: 1rem;
-		}
+        .tag {
+            display: block;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+    }
 
-	}
+    .head-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
 
+        h2 {
+            color: var(--text);
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 700;
+        }
+    }
+
+    .view-all {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+        transition: color 0.2s ease, gap 0.2s ease;
+
+        &:hover { color: var(--yellow); gap: 0.6rem; }
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+
+        @media (max-width: 900px) { grid-template-columns: 1fr; }
+    }
+
+    .card {
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 1.25rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+
+        &:hover { transform: translateY(-5px); }
+
+        &-red:hover    { border-color: var(--red); }
+        &-blue:hover   { border-color: var(--blue); }
+        &-yellow:hover { border-color: var(--yellow); }
+        &-purple:hover { border-color: var(--purple); }
+        &-pink:hover   { border-color: var(--pink); }
+        &-green:hover  { border-color: var(--green); }
+    }
+
+    // thumbnail bleeds edge-to-edge
+    .thumb {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        background: var(--surface-2);
+
+        img, video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            padding: 0;
+            margin: 0;
+            border-radius: 0;
+            transition: transform 0.4s ease;
+        }
+
+        .thumb-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0);
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 0.6rem 0.75rem;
+            transition: background 0.25s ease;
+
+            .count {
+                font-size: 0.75rem;
+                color: rgba(255,255,255,0);
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+                transition: color 0.25s ease;
+            }
+
+            .expand-icon {
+                font-size: 0.9rem;
+                color: rgba(255,255,255,0);
+                transition: color 0.25s ease;
+            }
+        }
+
+        &:hover img,
+        &:hover video {
+            transform: scale(1.04);
+        }
+    }
+
+    .card:hover .thumb-overlay {
+        background: rgba(0, 0, 0, 0.35);
+
+        .count, .expand-icon { color: rgba(255,255,255,0.9); }
+    }
+
+    .body {
+        padding: 1.25rem 1.25rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        flex-grow: 1;
+    }
+
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .tech-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .pill {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.15rem 0.6rem;
+        font-size: 0.72rem;
+        color: var(--text-muted);
+    }
+
+    .links {
+        display: flex;
+        gap: 0.6rem;
+        flex-shrink: 0;
+
+        a {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            &:hover { color: var(--yellow); }
+        }
+    }
+
+    h3 { font-size: 1.35rem; text-transform: lowercase; }
+    p  { font-size: 0.975rem; flex-grow: 1; }
 </style>

@@ -1,51 +1,271 @@
 ---
-import '../styles/globals.scss';
+const pathname = Astro.url.pathname;
+const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+const links = [
+    { href: '/', label: 'home' },
+    { href: '/projects/', label: 'projects' },
+    { href: '/contact', label: 'contact' },
+    { href: '/blog', label: 'blog' },
+];
+
+const accents = ['red', 'orange', 'yellow', 'blue', 'purple', 'pink', 'green'];
+
+import { INFO } from '../consts';
 ---
 
-<nav>
-  <a href="/">Home</a>
-  <a href="/projects/">Projects</a>
-  <a href="/contact">Contact</a>
-  <a href="/blog">Blog</a>
+<nav class="nav">
+    <!-- brand: theme-dot button + site name link, kept as siblings so no button-in-a is invalid -->
+    <div class="brand-area">
+        <div class="theme-wrap">
+            <button
+                class="dot"
+                id="theme-btn"
+                aria-label="Select colour theme"
+                aria-expanded="false"
+                aria-haspopup="true"
+            ></button>
+
+            <div class="theme-menu" id="theme-menu" role="menu">
+                <span class="menu-label mono">accent</span>
+                <div class="swatches">
+                    {accents.map(a => (
+                        <button
+                            class="swatch"
+                            role="menuitem"
+                            data-accent={a}
+                            style={`--c: var(--${a})`}
+                            aria-label={a}
+                        ></button>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="brand-name mono">{INFO.site}</a>
+    </div>
+
+    <ul class="links">
+        {links.map((l) => (
+            <li>
+                <a href={l.href} class:list={[{ active: isActive(l.href) }]}>
+                    {l.label}
+                </a>
+            </li>
+        ))}
+    </ul>
 </nav>
 
 <style lang="scss">
-  $stroke-size: 1px;
+    .nav {
+        max-width: 72rem;
+        margin: 1.5rem auto;
+        padding: 0.75rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        background: rgba(20, 20, 31, 0.7);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 1rem;
+        z-index: 100;
 
-  nav {
-    background-color: var(--navbar-color);
-    padding: 1rem;
-    margin-right: 13rem;
-    border-radius: 1.25rem;
-    font-size: 3.75rem;
-    position: relative;
-    z-index: 1000;
-
-    a {
-      margin-right: 1rem;
-      color: var(--white);
-      text-decoration: none;
-      text-shadow: 0.2rem 0.2rem 0.2rem var(--white-40);
-
-      &:hover {
-        color: var(--yellow);
-        text-shadow: 0.3rem 0.3rem 0.3rem var(--yellow-40);
-      }
+        @media (max-width: 640px) {
+            margin: 1rem;
+            padding: 0.5rem 0.75rem;
+            gap: 0.5rem;
+        }
     }
 
-    @media (max-width: 1150px) {
-      font-size: 2.5rem;
-      margin-right: 20%;
+    /* ── brand area ── */
+    .brand-area {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
     }
 
-    @media (max-width: 800px) {
-      font-size: 2rem;
-      margin-right: 20%;
-    }
-      @media (max-width: 650px) {
-        min-width: 15rem;
-        margin-right: 2%
-      }
-  }
+    .brand-name {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text);
+        &:hover { color: var(--text); }
 
+        @media (max-width: 500px) { display: none; }
+    }
+
+    /* ── dot / trigger ── */
+    .theme-wrap {
+        position: relative;
+    }
+
+    .dot {
+        // reset all button chrome so it looks identical to the original <span>
+        -webkit-appearance: none;
+        appearance: none;
+        display: block;
+        border: none;
+        padding: 0;
+        margin: 0;
+        background: var(--accent);
+        box-shadow: 0 0 12px var(--accent);
+
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 50%;
+        cursor: pointer;
+
+        // only transition transform — background/box-shadow snap instantly
+        // so the colour is correct from first paint and when switching themes
+        transition: transform 0.2s ease;
+
+        // colour/glow update when theme changes — use a class added after load
+        &.themed { transition: transform 0.2s ease, background 0.3s ease, box-shadow 0.3s ease; }
+
+        &:hover { transform: scale(1.35); }
+        &:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    }
+
+    /* ── dropdown ── */
+    .theme-menu {
+        position: absolute;
+        top: calc(100% + 0.7rem);
+        left: 50%;
+        transform: translateX(-50%) translateY(-6px);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 0.9rem;
+        padding: 0.6rem 0.7rem 0.7rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.45rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        z-index: 200;
+        backdrop-filter: blur(10px);
+
+        &.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .menu-label {
+        font-size: 0.68rem;
+        color: var(--text-dim);
+        letter-spacing: 0.06em;
+        user-select: none;
+    }
+
+    .swatches {
+        display: flex;
+        gap: 0.35rem;
+    }
+
+    .swatch {
+        width: 1.1rem;
+        height: 1.1rem;
+        border-radius: 50%;
+        background: var(--c);
+        border: 2px solid transparent;
+        padding: 0;
+        cursor: pointer;
+        transition: transform 0.15s ease, border-color   0.15s ease;
+
+        &:hover  { transform: scale(1.25); }
+        &:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+        &.active {
+            border-color: var(--text);
+            transform: scale(1.15);
+        }
+    }
+
+    /* ── nav links ── */
+    .links {
+        list-style: none;
+        display: flex;
+        gap: 0.25rem;
+        margin: 0;
+        padding: 0;
+
+        a {
+            display: inline-block;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            border-radius: 999px;
+            transition: all 0.2s ease;
+
+            &:hover  { color: var(--text); background: var(--surface-2); }
+            &.active { color: var(--text); background: var(--surface-2); }
+        }
+
+        @media (max-width: 500px) {
+            a { padding: 0.35rem 0.7rem; font-size: 0.85rem; }
+        }
+    }
 </style>
+
+<script>
+    const btn  = document.getElementById('theme-btn')  as HTMLButtonElement | null;
+    const menu = document.getElementById('theme-menu') as HTMLElement      | null;
+    const html = document.documentElement;
+
+    // ── restore & apply saved accent ────────────────────────────
+    const saved = localStorage.getItem('accent') ?? 'red';
+    applyAccent(saved);
+    // enable colour transition only after the initial paint so the dot
+    // never animates from the wrong colour on load
+    requestAnimationFrame(() => btn?.classList.add('themed'));
+
+    // ── toggle dropdown ─────────────────────────────────────────
+    btn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const opening = !menu?.classList.contains('open');
+        menu?.classList.toggle('open', opening);
+        btn.setAttribute('aria-expanded', String(opening));
+    });
+
+    // close on outside click
+    document.addEventListener('click', () => {
+        menu?.classList.remove('open');
+        btn?.setAttribute('aria-expanded', 'false');
+    });
+
+    // close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            menu?.classList.remove('open');
+            btn?.setAttribute('aria-expanded', 'false');
+            btn?.focus();
+        }
+    });
+
+    // ── swatch clicks ────────────────────────────────────────────
+    menu?.querySelectorAll<HTMLButtonElement>('.swatch').forEach(sw => {
+        sw.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const accent = sw.dataset.accent!;
+            applyAccent(accent);
+            localStorage.setItem('accent', accent);
+            menu.classList.remove('open');
+            btn?.setAttribute('aria-expanded', 'false');
+        });
+    });
+
+    // ── helper ───────────────────────────────────────────────────
+    function applyAccent(accent: string) {
+        html.dataset.accent = accent;
+        menu?.querySelectorAll<HTMLButtonElement>('.swatch').forEach(sw => {
+            sw.classList.toggle('active', sw.dataset.accent === accent);
+        });
+    }
+</script>

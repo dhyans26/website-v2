@@ -1,28 +1,70 @@
 ---
-import '../styles/globals.scss';
+import { INFO } from '../consts';
+const year = new Date().getFullYear();
 ---
-<footer>
-  <p>Made with ♥ by Dhyan</p>
+
+<footer class="footer">
+    <div class="container inner">
+        <div class="left">
+            <span class="mono">made with <span class="heart">♥</span> by {INFO.name}</span>
+            <span class="mono dim">© {year} — built w/ astro + sass</span>
+        </div>
+        <div class="right">
+            <a href={`https://github.com/${INFO.github}`} target="_blank" rel="noopener">
+                <i class="bi bi-github"></i>
+            </a>
+            <a href={`mailto:${INFO.email}`}>
+                <i class="bi bi-envelope-fill"></i>
+            </a>
+        </div>
+    </div>
 </footer>
 
 <style lang="scss">
-
-    footer {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 8rem;
-      position: relative;
-
-
-      p {
-        text-align: center;
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        font-size: 2rem;
-      }
+    .footer {
+        border-top: 1px solid var(--border);
+        padding: 2.5rem 0;
+        margin-top: 4rem;
     }
 
+    .inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
 
+    .left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
 
-  </style>
+        .dim {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+    }
+
+    .heart {
+        color: var(--red);
+    }
+
+    .right {
+        display: flex;
+        gap: 1rem;
+
+        a {
+            color: var(--text-muted);
+            font-size: 1.35rem;
+            transition: color 0.2s ease, transform 0.2s ease;
+
+            &:hover {
+                color: var(--red);
+                transform: translateY(-2px);
+            }
+        }
+    }
+</style>

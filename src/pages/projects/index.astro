@@ -1,127 +1,198 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
 import { readFileSync } from 'fs';
 import { parse } from 'yaml';
 
-const file = readFileSync('src/content/projects.yaml', 'utf-8');
-const projects = parse(file);
+const projects = parse(readFileSync('src/content/projects.yaml', 'utf-8'));
+const isVideo = (src: string) => /\.(mp4|webm|mov|ogg)(\?|$)/i.test(src);
+const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
 ---
 
 <BaseLayout pageTitle="Projects">
-	<div class="projects-header">
-		<h1>Projects</h1>
-		<h2>Here are some things I've built</h2>
-	</div>
+    <section class="container page">
+        <header class="head">
+            <span class="mono tag">/ projects</span>
+            <h1>things i've built</h1>
+            <p>some of the fun stuff i've made!</p>
+        </header>
 
-	<div class="projects-grid">
-		{projects.map((project) => (
-			<div class="project-card">
-				<h3>{project.title}</h3>
-				<p class="project-description">{project.description}</p>
-				<div class="tech-tags">
-					{project.tech.map((t) => (
-						<span class="tag">{t}</span>
-					))}
-				</div>
-				<div class="project-links">
-					<a href={project.github} target="_blank" rel="noopener noreferrer">
-						<i class="bi bi-github"></i> Code
-					</a>
-					{project.live && (
-						<a href={project.live} target="_blank" rel="noopener noreferrer">
-							<i class="bi bi-box-arrow-up-right"></i> Live
-						</a>
-					)}
-				</div>
-			</div>
-		))}
-	</div>
+        <div class="grid">
+            {projects.map((p: any, i: number) => {
+                const media = cleanMedia(p.media);
+                const thumb = media[0];
+                return (
+                    <article
+                        class="proj"
+                        data-project={JSON.stringify({ title: p.title, description: p.description, tech: p.tech, github: p.github, live: p.live ?? null, media })}
+                    >
+                        {thumb && (
+                            <div class="thumb">
+                                {isVideo(thumb)
+                                    ? <video src={thumb} muted loop autoplay playsinline />
+                                    : <img src={thumb} alt={p.title} loading="lazy" />
+                                }
+                                <div class="thumb-overlay">
+                                    {media.length > 1 && <span class="count mono"><i class="bi bi-images"></i> {media.length}</span>}
+                                    <i class="bi bi-arrows-fullscreen expand-icon"></i>
+                                </div>
+                            </div>
+                        )}
+
+                        <div class="body">
+                            <div class="top">
+                                <span class="mono idx">{String(i + 1).padStart(2, '0')}</span>
+                                <div class="ext-links">
+                                    <a href={p.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                                        <i class="bi bi-github"></i>
+                                    </a>
+                                    {p.live && (
+                                        <a href={p.live} target="_blank" rel="noopener noreferrer" aria-label="Live">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                            <h3>{p.title}</h3>
+                            <p>{p.description}</p>
+                            <div class="tags">
+                                {p.tech.map((t: string) => (
+                                    <span class="tag-pill mono">{t}</span>
+                                ))}
+                            </div>
+                        </div>
+                    </article>
+                );
+            })}
+        </div>
+    </section>
 </BaseLayout>
 
 <style lang="scss">
-	.projects-header {
-		text-align: center;
-		margin-bottom: 2rem;
+    .page {
+        padding: 3rem 1.5rem 4rem;
+    }
 
-		h2 {
-			margin-top: 0;
-		}
-	}
+    .head {
+        margin-bottom: 3rem;
+        max-width: 40rem;
 
-	.projects-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-		gap: 2rem;
-		margin: 2rem;
+        .tag { display: block; color: var(--text-dim); font-size: 0.9rem; margin-bottom: 0.5rem; }
+        h1   { margin-bottom: 0.75rem; text-transform: lowercase; }
+        p    { font-size: 1.1rem; }
+    }
 
-		@media (max-width: 600px) {
-			grid-template-columns: 1fr;
-			margin: 1rem;
-		}
-	}
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+        gap: 1.5rem;
+    }
 
-	.project-card {
-		background: var(--background-color);
-		border-radius: 1.5rem;
-		padding: 2rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    .proj {
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 1.25rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        transition: transform 0.3s ease, border-color 0.3s ease;
 
-		&:hover {
-			transform: translateY(-0.25rem);
+        &:hover {
+            transform: translateY(-4px);
+            border-color: var(--red);
+        }
+    }
 
-		}
+    .thumb {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        background: var(--surface-2);
 
-		h3 {
-			font-size: 1.75rem;
-			margin: 0;
-			padding: 0;
-		}
-	}
+        img, video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            padding: 0;
+            margin: 0;
+            border-radius: 0;
+            transition: transform 0.4s ease;
+        }
 
-	.project-description {
-		font-size: 1rem;
-		font-weight: 400;
-		padding: 0;
-		margin: 0;
-		flex-grow: 1;
-	}
+        .thumb-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0);
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 0.6rem 0.75rem;
+            transition: background 0.25s ease;
 
-	.tech-tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
+            .count {
+                font-size: 0.75rem;
+                color: rgba(255,255,255,0);
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+                transition: color 0.25s ease;
+            }
 
-	.tag {
-		background: rgba(255, 255, 255, 0.15);
-		border-radius: 0.75rem;
-		padding: 0.25rem 0.75rem;
-		font-size: 0.85rem;
-		font-weight: 600;
-	}
+            .expand-icon {
+                font-size: 0.9rem;
+                color: rgba(255,255,255,0);
+                transition: color 0.25s ease;
+            }
+        }
 
-	.project-links {
-		display: flex;
-		gap: 1.5rem;
-		margin-top: 0.5rem;
+        &:hover img,
+        &:hover video { transform: scale(1.04); }
+    }
 
-		a {
-			text-decoration: none;
-			font-size: 1rem;
-			font-weight: 600;
-			transition: opacity 0.2s ease;
+    .proj:hover .thumb-overlay {
+        background: rgba(0, 0, 0, 0.35);
+        .count, .expand-icon { color: rgba(255,255,255,0.9); }
+    }
 
-			&:hover {
-				opacity: 0.7;
-			}
+    .body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        flex-grow: 1;
+    }
 
-			i {
-				margin-right: 0.25rem;
-			}
-		}
-	}
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .idx { color: var(--text-dim); font-size: 0.85rem; }
+
+        .ext-links {
+            display: flex;
+            gap: 0.75rem;
+            a { color: var(--text-muted); font-size: 1.15rem; &:hover { color: var(--red); } }
+        }
+    }
+
+    h3 { font-size: 1.5rem; text-transform: lowercase; }
+    p  { flex-grow: 1; font-size: 1rem; }
+
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .tag-pill {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.2rem 0.7rem;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
 </style>

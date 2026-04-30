@@ -5,7 +5,7 @@ export const INFO = {
     education: 'High School',
     gradeLevel: 'Junior',
     location: 'Boston',
-    github: 'bluelightning26',
-    email: 'me@dhyans.xyz'
-
+    github: 'dhyans26',
+    email: 'me@dhyans.dev',
+    site: 'dhyans.dev',
 }

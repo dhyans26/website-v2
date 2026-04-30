@@ -1,106 +1,184 @@
 :root {
-  --white: rgb(255, 255, 255);
-  --white-40: rgba(255, 255, 255, 0.4);
-  --black: #000000;
-  --red: #FF9898;
-  --orange: #FFC399;
-  --yellow: rgba(255, 238, 153);
-  --yellow-40: rgba(255, 238, 153, 0.4);;
-  --blue: #99DDFF;
-  --purple: #AA99FF;
-  --pink: #FF99FF;
-  --pink-40: rgba(255, 153, 255, 0.4);
-  --background-color: #9485E0;
-  --navbar-color: #85C2E0;
+  // surfaces
+  --bg: #0d0d15;
+  --surface: #14141f;
+  --surface-2: #1c1c2b;
+  --border: #2a2a3a;
 
+  // text
+  --text: #f5f5f7;
+  --text-muted: #a0a0b0;
+  --text-dim: #6a6a7a;
+
+  // accents — soft pastels, carried over from v1
+  --red: #ff9898;
+  --orange: #ffc399;
+  --yellow: #ffee99;
+  --yellow-40: rgba(255, 238, 153, 0.4);
+  --blue: #99ddff;
+  --purple: #aa99ff;
+  --pink: #ff99ff;
+  --pink-40: rgba(255, 153, 255, 0.4);
+  --green: #9fe6c4;
+
+  // legacy aliases (still referenced in some components)
+  --white: var(--text);
+  --black: var(--bg);
+  --background-color: var(--surface);
+  --navbar-color: var(--surface-2);
+
+  // active accent — defaults to red, overridden by [data-accent] on <html>
+  --accent: var(--red);
 }
 
-
-
-
+[data-accent="red"]    { --accent: var(--red);    }
+[data-accent="orange"] { --accent: var(--orange);  }
+[data-accent="yellow"] { --accent: var(--yellow);  }
+[data-accent="blue"]   { --accent: var(--blue);    }
+[data-accent="purple"] { --accent: var(--purple);  }
+[data-accent="pink"]   { --accent: var(--pink);    }
+[data-accent="green"]  { --accent: var(--green);   }
 
 * {
-  // <weight>: Use a value from 100 to 900
-  // <uniquifier>: Use a unique and descriptive class name
-  font-family: "Inter", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 800;
-  font-style: normal;
-
-  ::selection {
-    background-color: rgba(0, 0, 0, 0.5);
-    color: rgba(255, 255, 255, 0.75);
-  }
-
-  //defaults
-  color: var(--white);
+  box-sizing: border-box;
 }
 
+html {
+  background: rgba(13, 13, 21, 0.8); // 80% - i like b/w 70 and 90
+  background-attachment: fixed;
+}
 
-  h1 {
-    color: var(--white);
-    font-size: 6.25rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-    text-shadow: 0.25rem 0.25rem 0.25rem var(--white-40);
+html, body {
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  font-family: "Space Grotesk Variable", "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-    &:hover {
-      text-shadow: 0.45rem 0.45rem 0.45rem var(--white-40);
-      transition: text-shadow 0.3s ease-in-out;
-    }
+body {
+  position: relative;
+  min-height: 100vh;
+}
 
-    @media (max-width: 1200px) {
-      font-size: 4rem;
-      margin: 1rem;
-    }
-    @media (max-width: 600px) {
-      font-size: 2rem;
-      margin: 0rem;
-    }
+// film grain overlay — adds depth/texture on top of everything
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.032;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  animation: grain 0.4s steps(1) infinite;
+}
+
+@keyframes grain {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-4px, -7px); }
+  40%  { transform: translate(-6px, 4px); }
+  60%  { transform: translate(7px, -4px); }
+  80%  { transform: translate(4px, 8px); }
+  100% { transform: translate(-7px, 3px); }
+}
+
+// fixed dark overlay + ambient glows — persists at all scroll positions
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 0%, rgba(170, 153, 255, 0.14), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 20%, rgba(153, 221, 255, 0.10), transparent 60%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(255, 152, 152, 0.07), transparent 60%),
+    rgba(13, 13, 21, 0.8); // dark tint as base layer (keeps user's 80% preference)
+}
+
+::selection {
+  background: var(--yellow);
+  color: var(--bg);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Space Grotesk Variable", "Space Grotesk", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--text);
+}
+
+h1 {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+}
+
+h2 {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+p {
+  color: var(--text-muted);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+a {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--yellow);
   }
+}
 
-  h2 {
-    color: var(--white);
-    font-size: 1.625rem;
-    margin-top: -2rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-    text-shadow: 0.1rem 0.1rem 0.1rem var(--white-40);
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
 
-    @media (max-width: 1200px) {
-      font-size: 1.625rem;
-      margin: 1rem;
-      transition: text-shadow 0.3s ease-in-out;
-    }
+code, .mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.9em;
+}
+
+.container {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+
+  @media (max-width: 640px) {
+    padding: 0 1rem;
   }
+}
 
-  p {
-    color: var(--white);
-    font-size: 1.25rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-    text-shadow: 0.05rem 0.05rem 0.05rem var(--white-40);
+// reusable chunky card with thick border
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: var(--text-dim);
   }
-
-
-  img {
-    max-width: 100%;
-    height: auto;
-    padding: 1rem;
-    margin: 1rem;
-  }
-
-  i {
-    color: var(--white);
-    cursor: pointer;
-    align-items: center;
-  }
-
-.content {
-  display: flex;
-  border-radius: 2rem;
-  margin: 2rem;
-  align-items: center;
-  margin-top: 5rem;
-  background: var(--background-color);
 }
