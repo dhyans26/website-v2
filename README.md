@@ -1,14 +1,11 @@
 # My WIP Personal Website v2
-## Tech stack: 
 
-![](https://skillicons.dev/icons?i=astro,sass,typescript,bootstrap,md,github,vercel,cloudflare,netlify,npm,git,figma,yarn,bash,html,css,js,svg,webstorm&perline=5)
+## Stack
+
+![](https://skillicons.dev/icons?i=astro,sass,typescript,bootstrap,tailwind,md,github,vercel,cloudflare,netlify,npm,git,figma,yarn,bash,html,css,js,d3,svg,webstorm&perline=5)
+
 
 ## Astro Dev Commands
-
-All commands are run from the root of the project, from a terminal:
-
-(npm version: initially was working with yarn but encountered issues so switched to npm)
-
 | Command                   | Action                                           |
 | :------------------------ | :----------------------------------------------- |
 | `npm install`             | Installs dependencies                            |
@@ -18,3 +15,9 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 [Astro documentation](https://docs.astro.build)
+
+## Content
+
+Most site data is easily changable + tileable in `src/content/` as YAML (ex. projects, experiences, pfp, maps)
+
+Personal info (name, email, location, links, etc.) is in `src/consts.ts`.
