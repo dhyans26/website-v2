@@ -16,7 +16,7 @@
   accent: blue
   media:
     - /projects/3dSnakePoster.webp
-    - /projects/InternY.webp
+    - /projects/3d-snake.jpg
 
 - title: DhyanAi
   description: An AI aggregate chat portal that's unblocked, with a custom admin panel and statistics. Designed for use with peers.
@@ -30,8 +30,8 @@
   pinned: true
   accent: purple
   media:
-    - /projects/InternR.webp
-    - /projects/InternY.webp
+    - /projects/internR.webp
+    - /projects/internY.webp
 
 - title: BluBoard
   description: A custom 75% keyboard! Has two rotary encoders with switches as an extra. Powered using a Pi Pico running KMK firmware.

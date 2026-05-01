@@ -23,6 +23,8 @@ interface Hackathon {
     period: string;
     description: string;
     image: string;
+    github?: string;
+    live?: string;
 }
 
 interface Props {
@@ -90,10 +92,26 @@ const { experiences = [], hackathons = [] } = Astro.props;
                                 </div>
                             )}
                             <div class="h-body">
-                                <div class="h-meta">
-                                    <span class="h-name">{h.name}</span>
-                                    {(h.location || h.period) && (
-                                        <span class="h-sub mono">{[h.location, h.period].filter(Boolean).join(' · ')}</span>
+                                <div class="h-top">
+                                    <div class="h-meta">
+                                        <span class="h-name">{h.name}</span>
+                                        {(h.location || h.period) && (
+                                            <span class="h-sub mono">{[h.location, h.period].filter(Boolean).join(' · ')}</span>
+                                        )}
+                                    </div>
+                                    {(h.github || h.live) && (
+                                        <div class="h-links">
+                                            {h.github && (
+                                                <a href={h.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub" onclick="event.stopPropagation()">
+                                                    <i class="bi bi-github"></i>
+                                                </a>
+                                            )}
+                                            {h.live && (
+                                                <a href={h.live} target="_blank" rel="noopener noreferrer" aria-label="Live demo" onclick="event.stopPropagation()">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                                 {h.description && <p class="h-desc">{h.description}</p>}
@@ -365,10 +383,29 @@ const { experiences = [], hackathons = [] } = Astro.props;
         flex-grow: 1;
     }
 
+    .h-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
     .h-meta {
         display: flex;
         flex-direction: column;
         gap: 0.15rem;
+    }
+
+    .h-links {
+        display: flex;
+        gap: 0.6rem;
+        flex-shrink: 0;
+
+        a {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            &:hover { color: var(--yellow); }
+        }
     }
 
     .h-name {

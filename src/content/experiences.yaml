@@ -6,26 +6,36 @@ hackathons:
     period: "july 2025"
     description: ""
     image: ""
+    github: "https://github.com/dhyans26/3d-snake"
+    live: ""
   - name: Campfire Flagship
     location: Los Angeles, CA
     period: "feb 2026"
     description: ""
     image: ""
+    github: "https://github.com/daaminashai/clickaberry"
+    live: ""
   - name: Scrapyard Boston
     location: Boston, MA
     period: "march 2025"
     description: ""
     image: ""
+    github: "https://github.com/Pooch63/Scrapyard-3-15-2025"
+    live: ""
   - name: Daydream Boston
     location: Boston, MA
     period: "september 2025"
     description: ""
     image: ""
+    github: "https://github.com/dhyans26/daydream-second-time-charm"
+    live: "https://bluelightning26.itch.io/doubloon-paradise"
   - name: Hacknight
     location: Cambridge, MA
     period: "may 2025"
     description: ""
     image: ""
+    github: ""
+    live: ""
 
 experiences:
 - role: clubs engineer

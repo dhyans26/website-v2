@@ -18,8 +18,12 @@ const isVideo = (src: string) => /\.(mp4|webm|mov|ogg)(\?|$)/i.test(src);
 const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
 ---
 
+
+
 <BaseLayout pageTitle="Home">
     <Landing />
+
+    <Experiences experiences={allExperiences} hackathons={allHackathons} />
 
     <section class="featured container">
         <header class="section-head">
@@ -73,7 +77,7 @@ const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
                                 </div>
                             </div>
                             <h3>{p.title}</h3>
-                            <p>{p.description}</p>
+                            <p class="proj-desc">{p.description}</p>
                         </div>
                     </article>
                 );
@@ -81,10 +85,34 @@ const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
         </div>
     </section>
 
-    <Experiences experiences={allExperiences} hackathons={allHackathons} />
-
     <LogoCarousel />
 </BaseLayout>
+
+<script>
+    const LIMIT = 120;
+    document.querySelectorAll<HTMLParagraphElement>('.proj-desc').forEach(p => {
+        const full = p.textContent?.trim() ?? '';
+        if (full.length <= LIMIT) return;
+
+        const short = full.slice(0, LIMIT).trimEnd();
+        const textNode = document.createTextNode(short + '… ');
+        const btn = document.createElement('button');
+        btn.textContent = 'more';
+        btn.style.cssText = 'background:none;border:none;padding:0;cursor:pointer;font-size:inherit;font-family:inherit;color:var(--accent);';
+
+        let expanded = false;
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            expanded = !expanded;
+            textNode.textContent = expanded ? full + ' ' : short + '… ';
+            btn.textContent = expanded ? 'less' : 'more';
+        });
+
+        p.textContent = '';
+        p.appendChild(textNode);
+        p.appendChild(btn);
+    });
+</script>
 
 <style lang="scss">
     .featured {
