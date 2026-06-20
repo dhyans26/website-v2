@@ -179,6 +179,25 @@ import { INFO } from '../consts';
         gap: 0.35rem;
     }
 
+    /* On mobile the trigger sits at the screen's left edge, so a centered
+       horizontal row of swatches overflows off-screen. Stack vertically and
+       anchor the menu to the left instead. */
+    @media (max-width: 640px) {
+        .theme-menu {
+            left: 0;
+            transform: translateX(0) translateY(-6px);
+
+            .theme-wrap:hover > &,
+            .theme-wrap:focus-within > & {
+                transform: translateX(0) translateY(0);
+            }
+        }
+
+        .swatches {
+            flex-direction: column;
+        }
+    }
+
     .swatch {
         width: 1.1rem;
         height: 1.1rem;
