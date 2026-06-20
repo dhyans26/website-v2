@@ -45,7 +45,8 @@
 
 html {
   background: rgba(13, 13, 21, 0.8); // 80% - i like b/w 70 and 90
-  background-attachment: fixed;
+  // note: `background-attachment: fixed` was removed — it's a no-op on a solid
+  // color but forces costly repaints while scrolling on mobile.
 }
 
 html, body {
@@ -87,6 +88,14 @@ body::after {
   60%  { transform: translate(7px, -4px); }
   80%  { transform: translate(4px, 8px); }
   100% { transform: translate(-7px, 3px); }
+}
+
+// The animated grain layer composites a full-viewport noise texture every
+// frame — fine on desktop, but a constant repaint/battery drain on mobile.
+// Keep the texture, drop the animation on small screens and for users who
+// prefer reduced motion.
+@media (max-width: 720px), (prefers-reduced-motion: reduce) {
+  body::after { animation: none; }
 }
 
 // fixed dark overlay + ambient glows — persists at all scroll positions

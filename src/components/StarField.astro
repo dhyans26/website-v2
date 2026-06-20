@@ -20,9 +20,12 @@ function starShadows(count: number, spread: number, seed: number, maxBright = 1)
 }
 
 const SPREAD = 3000;
-const far   = starShadows(700, SPREAD, 7,    0.85);
-const mid   = starShadows(250, SPREAD, 42,   0.95);
-const near  = starShadows(90,  SPREAD, 1337, 1);
+// Star counts trimmed (~40% fewer shadows) — a smaller box-shadow chain is
+// dramatically cheaper to paint, especially on mobile GPUs, with no visible
+// loss of density.
+const far   = starShadows(420, SPREAD, 7,    0.85);
+const mid   = starShadows(160, SPREAD, 42,   0.95);
+const near  = starShadows(60,  SPREAD, 1337, 1);
 const focal = starShadows(1,   SPREAD, 99,   1);
 
 // shooting star spawn points — top-right sky area
@@ -54,41 +57,58 @@ const shoots = [
 </div>
 
 <script>
-    // --- scroll parallax ---
-    let scrollY = 0;
-    let scrollTicking = false;
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Touch devices have no mouse to drive the parallax, so the whole effect
+    // (and its perpetual rAF loop) is pure wasted work there.
+    const finePointer = matchMedia('(pointer: fine)').matches;
+    const root = document.documentElement;
 
-    const onScroll = () => {
-        scrollY = window.scrollY;
-        if (!scrollTicking) {
-            requestAnimationFrame(() => {
-                document.documentElement.style.setProperty('--scroll', String(scrollY));
-                scrollTicking = false;
-            });
-            scrollTicking = true;
-        }
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    // --- scroll parallax ---
+    if (!reduceMotion) {
+        let scrollTicking = false;
+        const onScroll = () => {
+            if (!scrollTicking) {
+                requestAnimationFrame(() => {
+                    root.style.setProperty('--scroll', String(window.scrollY));
+                    scrollTicking = false;
+                });
+                scrollTicking = true;
+            }
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+    }
 
     // --- mouse parallax (lerped for smoothness) ---
-    let targetX = 0, targetY = 0;
-    let mouseX  = 0, mouseY  = 0;
+    // Only on fine-pointer (i.e. mouse) devices, and the rAF loop now *stops*
+    // once it settles instead of running forever — it restarts on the next
+    // mousemove. This keeps the main thread idle while the page is still.
+    if (finePointer && !reduceMotion) {
+        let targetX = 0, targetY = 0;
+        let mouseX  = 0, mouseY  = 0;
+        let rafId = 0;
 
-    window.addEventListener('mousemove', (e) => {
-        targetX = (e.clientX / window.innerWidth  - 0.5) * 11.2;
-        targetY = (e.clientY / window.innerHeight - 0.5) * 11.2;
-    }, { passive: true });
+        const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+        const tickMouse = () => {
+            mouseX = lerp(mouseX, targetX, 0.06);
+            mouseY = lerp(mouseY, targetY, 0.06);
+            root.style.setProperty('--mouse-x', `${mouseX.toFixed(2)}px`);
+            root.style.setProperty('--mouse-y', `${mouseY.toFixed(2)}px`);
 
-    const tickMouse = () => {
-        mouseX = lerp(mouseX, targetX, 0.06);
-        mouseY = lerp(mouseY, targetY, 0.06);
-        document.documentElement.style.setProperty('--mouse-x', `${mouseX.toFixed(2)}px`);
-        document.documentElement.style.setProperty('--mouse-y', `${mouseY.toFixed(2)}px`);
-        requestAnimationFrame(tickMouse);
-    };
-    tickMouse();
+            // Settled close enough to the target — stop the loop.
+            if (Math.abs(targetX - mouseX) < 0.01 && Math.abs(targetY - mouseY) < 0.01) {
+                rafId = 0;
+                return;
+            }
+            rafId = requestAnimationFrame(tickMouse);
+        };
+
+        window.addEventListener('mousemove', (e) => {
+            targetX = (e.clientX / window.innerWidth  - 0.5) * 11.2;
+            targetY = (e.clientY / window.innerHeight - 0.5) * 11.2;
+            if (!rafId) rafId = requestAnimationFrame(tickMouse);
+        }, { passive: true });
+    }
 </script>
 
 <style lang="scss">
@@ -264,5 +284,18 @@ const shoots = [
             animation: none !important;
             opacity: 1 !important;
         }
+    }
+
+    // On mobile, keep the starfield static: twinkling repaints the large
+    // box-shadow layers every frame, the shooting stars animate forever, and
+    // the parallax transforms each spawn a permanent GPU layer. Dropping them
+    // leaves the same sky without the per-frame cost.
+    @media (max-width: 720px) {
+        .stars, .nebula, .planet, .layer-focal {
+            animation: none !important;
+            transform: none !important;
+            will-change: auto;
+        }
+        .shoots { display: none; }
     }
 </style>

@@ -190,28 +190,38 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     let cx = [0, 0], cy = [0, 0];
     let raf = 0;
 
+    // Mouse-driven parallax: pointless on touch devices, so don't even wire it
+    // up there. The loop also self-terminates once it settles and restarts on
+    // the next mouse move, rather than spinning forever.
+    const finePointer = matchMedia('(pointer: fine)').matches;
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     function tick() {
+        let moving = false;
         layers.forEach((l, i) => {
             cx[i] += (tx[i] - cx[i]) * 0.07;
             cy[i] += (ty[i] - cy[i]) * 0.07;
             l.el.style.transform = `translate(${cx[i]}px, ${cy[i]}px)`;
+            if (Math.abs(tx[i] - cx[i]) > 0.05 || Math.abs(ty[i] - cy[i]) > 0.05) moving = true;
         });
-        raf = requestAnimationFrame(tick);
+        raf = moving ? requestAnimationFrame(tick) : 0;
     }
 
-    void_el.addEventListener('mousemove', (e) => {
-        const r = void_el.getBoundingClientRect();
-        const mx = (e.clientX - r.left  - r.width  / 2);
-        const my = (e.clientY - r.top   - r.height / 2);
-        layers.forEach((l, i) => {
-            tx[i] =  mx * l.rx;
-            ty[i] =  my * l.ry;
+    if (finePointer && !reduceMotion) {
+        void_el.addEventListener('mousemove', (e) => {
+            const r = void_el.getBoundingClientRect();
+            const mx = (e.clientX - r.left  - r.width  / 2);
+            const my = (e.clientY - r.top   - r.height / 2);
+            layers.forEach((l, i) => {
+                tx[i] =  mx * l.rx;
+                ty[i] =  my * l.ry;
+            });
+            if (!raf) raf = requestAnimationFrame(tick);
         });
-    });
 
-    void_el.addEventListener('mouseleave', () => {
-        layers.forEach((_, i) => { tx[i] = 0; ty[i] = 0; });
-    });
-
-    raf = requestAnimationFrame(tick);
+        void_el.addEventListener('mouseleave', () => {
+            layers.forEach((_, i) => { tx[i] = 0; ty[i] = 0; });
+            if (!raf) raf = requestAnimationFrame(tick);
+        });
+    }
 </script>
