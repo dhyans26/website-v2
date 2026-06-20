@@ -50,7 +50,7 @@ const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
                             <div class="thumb">
                                 {isVideo(thumb)
                                     ? <video src={thumb} muted loop autoplay playsinline />
-                                    : <img src={thumb} alt={p.title} loading="lazy" />
+                                    : <img src={thumb} alt={p.title} loading="lazy" decoding="async" />
                                 }
                                 <div class="thumb-overlay">
                                     {media.length > 1 && <span class="count mono"><i class="bi bi-images"></i> {media.length}</span>}
@@ -89,6 +89,7 @@ const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
 </BaseLayout>
 
 <script>
+    document.addEventListener('astro:page-load', () => {
     const LIMIT = 120;
     document.querySelectorAll<HTMLParagraphElement>('.proj-desc').forEach(p => {
         const full = p.textContent?.trim() ?? '';
@@ -111,6 +112,7 @@ const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
         p.textContent = '';
         p.appendChild(textNode);
         p.appendChild(btn);
+    });
     });
 </script>
 

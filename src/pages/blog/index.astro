@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout pageTitle="Blog">
+<BaseLayout pageTitle="Blog" description="Writing and notes from Dhyan — coming soon.">
     <section class="void" id="void">
 
         <div class="layer" id="l1">
@@ -170,10 +170,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 </style>
 
 <script>
-    const void_el = document.getElementById('void')!;
+    document.addEventListener('astro:page-load', () => {
+    const void_el = document.getElementById('void');
+    const l1 = document.getElementById('l1');
+    const l3 = document.getElementById('l3');
+    if (!void_el || !l1 || !l3) return;
     const layers = [
-        { el: document.getElementById('l1')!, rx: 0.045, ry: 0.045 },
-        { el: document.getElementById('l3')!, rx: 0.008, ry: 0.008 },
+        { el: l1, rx: 0.045, ry: 0.045 },
+        { el: l3, rx: 0.008, ry: 0.008 },
     ];
 
     let tx = [0, 0], ty = [0, 0];
@@ -213,4 +217,5 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
             if (!raf) raf = requestAnimationFrame(tick);
         });
     }
+    });
 </script>

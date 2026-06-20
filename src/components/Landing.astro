@@ -52,6 +52,10 @@ const defaultPfp = pfpList.reduce((best, p) => p.w >= best.w ? p : best, pfpList
             id="pfp"
             src={defaultPfp.src}
             alt={INFO.name}
+            width="352"
+            height="352"
+            fetchpriority="high"
+            decoding="async"
             data-pfp={JSON.stringify(pfpList)}
         />
         <span class="status mono">
@@ -249,6 +253,8 @@ const defaultPfp = pfpList.reduce((best, p) => p.w >= best.w ? p : best, pfpList
 </style>
 
 <script>
+    // Re-run on every view-transition navigation, not just the first load.
+    document.addEventListener('astro:page-load', () => {
     // ── typewriter ──────────────────────────────────────────────
     const heading = document.getElementById('hero-heading') as HTMLElement | null;
     if (heading) {
@@ -308,4 +314,5 @@ const defaultPfp = pfpList.reduce((best, p) => p.w >= best.w ? p : best, pfpList
             if (caption) caption.textContent = picked.caption;
         }
     }
+    });
 </script>

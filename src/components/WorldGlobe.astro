@@ -69,8 +69,25 @@
 
   // ISO 3166-1 numeric codes
   const VISITED = new Set([840, 124, 826, 250, 276, 528, 784, 356]);
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  document.addEventListener('DOMContentLoaded', async () => {
+  // Module-scoped lifecycle state. View transitions keep this module alive
+  // across navigations, so an un-stopped d3.timer would keep redrawing the
+  // (now detached) globe forever — we tear everything down on navigation.
+  let spin: d3.Timer | null = null;
+  let io: IntersectionObserver | null = null;
+  let onVisibility: (() => void) | null = null;
+
+  const stopSpin = () => { if (spin) { spin.stop(); spin = null; } };
+  const teardown = () => {
+    stopSpin();
+    if (io) { io.disconnect(); io = null; }
+    if (onVisibility) { document.removeEventListener('visibilitychange', onVisibility); onVisibility = null; }
+  };
+
+  async function initGlobe() {
+    teardown(); // clear any state left from a previous mount
+
     const wrap = document.querySelector<HTMLElement>('.globe-wrap');
     const svgEl = document.querySelector<SVGSVGElement>('.globe-svg');
     if (!wrap || !svgEl) return;
@@ -128,8 +145,6 @@
     // the globe is actually on screen and the tab is visible — otherwise it
     // burns the main thread (and battery) doing invisible work. Honor
     // reduced-motion by skipping the spin entirely.
-    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let spin: d3.Timer | null = null;
     let onScreen = false;
 
     const spinStep = () => {
@@ -143,19 +158,19 @@
       if (spin || reduceMotion || document.hidden || !onScreen) return;
       spin = d3.timer(spinStep);
     };
-    const stopSpin = () => {
-      if (spin) { spin.stop(); spin = null; }
-    };
 
     if (!reduceMotion) {
-      new IntersectionObserver(([entry]) => {
+      io = new IntersectionObserver(([entry]) => {
         onScreen = entry.isIntersecting;
         onScreen ? startSpin() : stopSpin();
-      }).observe(wrap);
-
-      document.addEventListener('visibilitychange', () => {
-        document.hidden ? stopSpin() : startSpin();
       });
+      io.observe(wrap);
+
+      onVisibility = () => { document.hidden ? stopSpin() : startSpin(); };
+      document.addEventListener('visibilitychange', onVisibility);
     }
-  });
+  }
+
+  document.addEventListener('astro:page-load', initGlobe);
+  document.addEventListener('astro:before-swap', teardown);
 </script>

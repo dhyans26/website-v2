@@ -1,8 +1,14 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
+    // Canonical origin — used for the sitemap, RSS feed, and canonical/OG URLs.
+    site: 'https://dhyans.dev',
+
+    integrations: [sitemap()],
+
     // Minify HTML output
     compressHTML: true,
 

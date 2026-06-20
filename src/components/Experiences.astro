@@ -88,7 +88,7 @@ const { experiences = [], hackathons = [] } = Astro.props;
                         <article class="h-card">
                             {h.image && (
                                 <div class="h-thumb">
-                                    <img src={h.image} alt={h.name} loading="lazy" />
+                                    <img src={h.image} alt={h.name} loading="lazy" decoding="async" />
                                 </div>
                             )}
                             <div class="h-body">

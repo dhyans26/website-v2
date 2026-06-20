@@ -137,7 +137,7 @@ const svgContent = readFileSync('public/experiences/north-america.svg', 'utf-8')
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('astro:page-load', () => {
     const visitedUsaStates = new Set([
       'AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'IL', 'IN', 'IA',
       'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'NE', 'NV',
