@@ -178,29 +178,39 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
     let tx = [0, 0], ty = [0, 0];
     let cx = [0, 0], cy = [0, 0];
+    let raf = 0;
+
+    // Mouse-driven parallax: skip entirely on touch devices, and let the loop
+    // settle to idle instead of running a rAF forever.
+    const finePointer = matchMedia('(pointer: fine)').matches;
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function tick() {
+        let moving = false;
         layers.forEach((l, i) => {
             cx[i] += (tx[i] - cx[i]) * 0.07;
             cy[i] += (ty[i] - cy[i]) * 0.07;
             l.el.style.transform = `translate(${cx[i]}px, ${cy[i]}px)`;
+            if (Math.abs(tx[i] - cx[i]) > 0.05 || Math.abs(ty[i] - cy[i]) > 0.05) moving = true;
         });
-        requestAnimationFrame(tick);
+        raf = moving ? requestAnimationFrame(tick) : 0;
     }
 
-    void_el.addEventListener('mousemove', (e) => {
-        const r = void_el.getBoundingClientRect();
-        const mx = e.clientX - r.left  - r.width  / 2;
-        const my = e.clientY - r.top   - r.height / 2;
-        layers.forEach((l, i) => {
-            tx[i] = mx * l.rx;
-            ty[i] = my * l.ry;
+    if (finePointer && !reduceMotion) {
+        void_el.addEventListener('mousemove', (e) => {
+            const r = void_el.getBoundingClientRect();
+            const mx = e.clientX - r.left  - r.width  / 2;
+            const my = e.clientY - r.top   - r.height / 2;
+            layers.forEach((l, i) => {
+                tx[i] = mx * l.rx;
+                ty[i] = my * l.ry;
+            });
+            if (!raf) raf = requestAnimationFrame(tick);
         });
-    });
 
-    void_el.addEventListener('mouseleave', () => {
-        layers.forEach((_, i) => { tx[i] = 0; ty[i] = 0; });
-    });
-
-    requestAnimationFrame(tick);
+        void_el.addEventListener('mouseleave', () => {
+            layers.forEach((_, i) => { tx[i] = 0; ty[i] = 0; });
+            if (!raf) raf = requestAnimationFrame(tick);
+        });
+    }
 </script>

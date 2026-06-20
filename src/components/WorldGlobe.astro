@@ -124,11 +124,38 @@
         .on('end', () => { dragging = false; })
     );
 
-    d3.timer(() => {
+    // Auto-rotation redraws every country path each frame. Only run it while
+    // the globe is actually on screen and the tab is visible — otherwise it
+    // burns the main thread (and battery) doing invisible work. Honor
+    // reduced-motion by skipping the spin entirely.
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let spin: d3.Timer | null = null;
+    let onScreen = false;
+
+    const spinStep = () => {
       if (dragging) return;
       const [rx, ry, rz] = projection.rotate();
       projection.rotate([rx + 0.12, ry, rz]);
       redraw();
-    });
+    };
+
+    const startSpin = () => {
+      if (spin || reduceMotion || document.hidden || !onScreen) return;
+      spin = d3.timer(spinStep);
+    };
+    const stopSpin = () => {
+      if (spin) { spin.stop(); spin = null; }
+    };
+
+    if (!reduceMotion) {
+      new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting;
+        onScreen ? startSpin() : stopSpin();
+      }).observe(wrap);
+
+      document.addEventListener('visibilitychange', () => {
+        document.hidden ? stopSpin() : startSpin();
+      });
+    }
   });
 </script>
