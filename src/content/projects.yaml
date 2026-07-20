@@ -1,6 +1,19 @@
 # media: list paths relative to /public — images or videos (.mp4/.webm)
 # accent: card hover color — red | blue | yellow | purple | pink | green
+- title: Clubs Platform
+  description: An integrated platform for Hack Clubs around the world to manage their clubs
+    and run workshops from start to finish! More to be revealed soon...
 
+  tech:
+    - Svelte
+    - Typescript
+  github: https://github.com/hackclub/clubs-platform
+  live: https://clubs.hackclub.com
+  pinned: true
+  accent: blue
+  media:
+    - /projects/internR.webp
+    - /projects/internY.webp
 - title: 3d Snake
   description: Snake ported to the third dimension!
     A cool custom 3D game console that spins to face the user in the age-old nostalgic classic game of Snake!
