@@ -90,7 +90,6 @@ const refreshedAt = `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.g
 <BaseLayout pageTitle="Projects">
     <section class="container page">
         <header class="head">
-            <span class="mono tag">/ projects</span>
             <h1>things i've built</h1>
             <p>some of the fun stuff i've made!</p>
             {latestCommit && (
@@ -172,7 +171,6 @@ const refreshedAt = `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.g
         margin-bottom: 3rem;
         max-width: 40rem;
 
-        .tag { display: block; color: var(--text-dim); font-size: 0.9rem; margin-bottom: 0.5rem; }
         h1   { margin-bottom: 0.75rem; text-transform: lowercase; }
         p    { font-size: 1.1rem; margin-bottom: 1rem; }
     }
