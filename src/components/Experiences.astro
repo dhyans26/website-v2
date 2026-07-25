@@ -8,6 +8,12 @@ const visitedData = parse(readFileSync('src/content/visited-states.yaml', 'utf-8
 const usaCount = (visitedData['visited-usa'] || []).length;
 const caCount = (visitedData['visited-canada'] || []).length;
 
+interface Stint {
+    role: string;
+    period: string;
+    description: string;
+}
+
 interface Experience {
     role: string;
     org: string;
@@ -15,6 +21,7 @@ interface Experience {
     description: string;
     icon: string;
     accent: string;
+    history?: Stint[];
 }
 
 interface Hackathon {
@@ -61,21 +68,35 @@ const { experiences = [], hackathons = [] } = Astro.props;
         <!-- ── right: experience cards + hackathons ── -->
         <div class="right-col">
             <div class="exp-sub">
-                {experiences.map((e: Experience, i: number) => (
-                    <article class={`exp-card accent-${e.accent} idx-${i}`}>
-                        <div class="exp-top">
-                            <span class="exp-icon">
-                                <i class={`bi ${e.icon}`}></i>
-                            </span>
-                            <span class="period mono">{e.period}</span>
-                        </div>
-                        <div class="exp-body">
-                            <span class="role">{e.role}</span>
-                            <span class="org mono">@ {e.org}</span>
-                            <p set:html={e.description} />
-                        </div>
-                    </article>
-                ))}
+                {experiences.map((e: Experience, i: number) => {
+                    const hasHistory = !!e.history?.length;
+                    return (
+                        <article
+                            class:list={['exp-card', `accent-${e.accent}`, `idx-${i}`, { clickable: hasHistory }]}
+                            data-xp-open={hasHistory ? String(i) : undefined}
+                            role={hasHistory ? 'button' : undefined}
+                            tabindex={hasHistory ? 0 : undefined}
+                            aria-haspopup={hasHistory ? 'dialog' : undefined}
+                        >
+                            <div class="exp-top">
+                                <span class="exp-icon">
+                                    <i class={`bi ${e.icon}`}></i>
+                                </span>
+                                <span class="period mono">{e.period}</span>
+                            </div>
+                            <div class="exp-body">
+                                <span class="role">{e.role}</span>
+                                <span class="org mono">@ {e.org}</span>
+                                <p set:html={e.description} />
+                                {hasHistory && (
+                                    <span class="xp-hint mono">
+                                        history <i class="bi bi-arrow-right-short"></i>
+                                    </span>
+                                )}
+                            </div>
+                        </article>
+                    );
+                })}
                 <article class="exp-card globe-card">
                     <WorldGlobe />
                 </article>
@@ -126,6 +147,86 @@ const { experiences = [], hackathons = [] } = Astro.props;
 
     <p class="section-footer mono">seems sparse? i'm trying to keep my digital footprint to a minimum as much as possible; <a href="/contact">get in touch</a> for more details!</p>
 </section>
+
+<!-- ── experience history modal ── -->
+<div class="xp-overlay" id="xp-modal" role="dialog" aria-modal="true" hidden>
+    <button class="xp-close" id="xp-modal-close" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+    </button>
+
+    <div class="xp-panel">
+        {experiences.map((e: Experience, i: number) => e.history?.length && (
+            <div class="xp-detail" data-xp-panel={String(i)} hidden>
+                <header class="xp-detail-head">
+                    <span class="exp-icon big">
+                        <i class={`bi ${e.icon}`}></i>
+                    </span>
+                    <div class="xp-detail-meta">
+                        <h3>{e.role}</h3>
+                        <span class="mono sub">@ {e.org} &nbsp;·&nbsp; {e.period}</span>
+                    </div>
+                </header>
+
+                <ol class="timeline">
+                    {e.history.map((h: Stint) => (
+                        <li>
+                            <span class="tl-marker" aria-hidden="true"></span>
+                            <div class="tl-body">
+                                <div class="tl-top">
+                                    <span class="tl-role">{h.role}</span>
+                                    <span class="tl-period mono">{h.period}</span>
+                                </div>
+                                <p set:html={h.description} />
+                            </div>
+                        </li>
+                    ))}
+                </ol>
+            </div>
+        ))}
+    </div>
+</div>
+
+<script>
+    const xpOverlay = document.getElementById('xp-modal')!;
+    const xpPanels  = xpOverlay.querySelectorAll<HTMLElement>('[data-xp-panel]');
+
+    function openXp(idx: string) {
+        xpPanels.forEach(p => p.toggleAttribute('hidden', p.dataset.xpPanel !== idx));
+        xpOverlay.removeAttribute('hidden');
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => xpOverlay.classList.add('open'));
+    }
+
+    function closeXp() {
+        xpOverlay.classList.remove('open');
+        const done = () => {
+            clearTimeout(fallback);
+            xpOverlay.setAttribute('hidden', '');
+            document.body.style.overflow = '';
+        };
+        const fallback = setTimeout(done, 350);
+        xpOverlay.addEventListener('transitionend', done, { once: true });
+    }
+
+    document.getElementById('xp-modal-close')!.addEventListener('click', closeXp);
+    xpOverlay.addEventListener('click', (e) => { if (e.target === xpOverlay) closeXp(); });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !xpOverlay.hasAttribute('hidden')) closeXp();
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-xp-open]').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if ((e.target as Element).closest('a')) return; // let links through
+            openXp(card.dataset.xpOpen!);
+        });
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openXp(card.dataset.xpOpen!);
+            }
+        });
+    });
+</script>
 
 <style lang="scss">
     .xp-section {
@@ -256,6 +357,24 @@ const { experiences = [], hackathons = [] } = Astro.props;
             overflow: hidden;
             &:hover { border-color: var(--yellow); transform: translateY(-4px); }
         }
+
+        &.clickable {
+            cursor: pointer;
+
+            &:hover .xp-hint, &:focus-visible .xp-hint { color: var(--accent); gap: 0.45rem; }
+        }
+    }
+
+    .xp-hint {
+        margin-top: 0.65rem;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        transition: color 0.2s ease, gap 0.2s ease;
+
+        i { font-size: 1rem; }
     }
 
     .exp-top {
@@ -437,5 +556,189 @@ const { experiences = [], hackathons = [] } = Astro.props;
         line-height: 1.5;
 
         a { color: var(--accent); text-decoration: none; &:hover { text-decoration: underline; } }
+    }
+
+    /* ── experience history modal ── */
+    .xp-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+
+        &.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    }
+
+    .xp-close {
+        position: fixed;
+        top: 1.25rem;
+        right: 1.25rem;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+        z-index: 10;
+        transition: background 0.2s ease, color 0.2s ease;
+
+        &:hover { background: var(--border); color: var(--text); }
+    }
+
+    .xp-panel {
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 1.5rem;
+        width: 100%;
+        max-width: 38rem;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 2rem;
+        transform: translateY(12px);
+        transition: transform 0.25s ease;
+
+        .xp-overlay.open & { transform: translateY(0); }
+
+        @media (max-width: 640px) {
+            padding: 1.25rem;
+            border-radius: 1.25rem;
+        }
+    }
+
+    .xp-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+
+        &[hidden] { display: none; }
+    }
+
+    .xp-detail-head {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .exp-icon.big {
+        width: 3rem;
+        height: 3rem;
+        flex-shrink: 0;
+
+        i { font-size: 1.35rem; color: var(--accent); }
+    }
+
+    .xp-detail-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        h3 {
+            font-size: 1.5rem;
+            text-transform: lowercase;
+            letter-spacing: -0.02em;
+        }
+
+        .sub {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+        }
+    }
+
+    /* ── timeline ── */
+    .timeline {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+
+        li {
+            position: relative;
+            padding: 0 0 1.5rem 1.75rem;
+
+            // connecting line
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0.4rem;
+                top: 0.5rem;
+                bottom: 0;
+                width: 2px;
+                background: var(--border);
+            }
+
+            &:last-child {
+                padding-bottom: 0;
+                &::before { display: none; }
+            }
+        }
+    }
+
+    .tl-marker {
+        position: absolute;
+        left: 0;
+        top: 0.3rem;
+        width: 0.9rem;
+        height: 0.9rem;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 2px solid var(--accent);
+    }
+
+    .tl-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .tl-top {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .tl-role {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text);
+        text-transform: lowercase;
+        letter-spacing: -0.02em;
+    }
+
+    .tl-period {
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        white-space: nowrap;
+    }
+
+    .tl-body p {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin: 0;
+        flex-grow: unset;
+    }
+
+    .tl-body :global(a) {
+        color: var(--accent);
+        text-decoration: none;
+        &:hover { text-decoration: underline; }
     }
 </style>
