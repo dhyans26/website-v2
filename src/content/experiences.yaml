@@ -38,6 +38,8 @@ hackathons:
     live: ""
 
 # history: optional list of stints shown in a timeline modal when the card is clicked
+#   type: badge(s) on the stint — full-time | part-time | contractor | internship
+#         (single value or a list, e.g. [full-time, internship])
 experiences:
 - role: Clubs Engineering and Infrastructure Lead
   org: The Hack Foundation
@@ -46,12 +48,19 @@ experiences:
   icon: bi-briefcase-fill
   accent: red
   history:
-    - role: Clubs Engineering and Infrastructure Lead (full-time)
-      period: "July 2026 - present"
+    - role: Clubs Engineering and Infrastructure Lead
+      type: full-time
+      period: "July 2026 – present"
       description: "specifics to be announced soon!"
-    - role: Clubs Program Engineer (full-time summer intern)
+    - role: Clubs Program Engineer
+      type: [full-time, internship]
       period: "June – July 2026"
       description: "building + maintaining the infra behind the clubs program."
-    - role: Clubs Engineering and Operations (part-time)
+    - role: Clubs Engineering and Operations
+      type: part-time
       period: "2025 – June 2026"
       description: "building + maintaining the infra behind the clubs program."
+    - role: Clubs Program Contributor
+      type: contractor
+      period: "2025"
+      description: "the first contributor to the modern clubs program!"

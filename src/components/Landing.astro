@@ -34,7 +34,7 @@ const defaultPfp = pfpList.reduce((best, p) => p.w >= best.w ? p : best, pfpList
         </h1>
         <p class="lede">
             A {INFO.education.toLowerCase()} {INFO.gradeLevel.toLowerCase()} from the {INFO.location} area,
-            currently tinkering and building underlying infrastructure <a href="https://hackclub.com"><span class="hl">@ The Hack&nbsp;Foundation</span></a> as a software engineer on the clubs program.
+            currently tinkering and building underlying infrastructure <a href={INFO.employerUrl}><span class="hl">@ {INFO.employer}</span></a> as the {INFO.role} with the {INFO.program}.
             My interests primarily lie in sports, aerospace, and engineering.
         </p>
         <div class="cta">
@@ -153,6 +153,7 @@ const defaultPfp = pfpList.reduce((best, p) => p.w >= best.w ? p : best, pfpList
     .hl {
         color: var(--text);
         font-weight: 500;
+        white-space: nowrap; // keep the org name from splitting across lines
     }
 
     .cta {
