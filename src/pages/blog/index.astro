@@ -117,20 +117,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
         .accent-word {
             color: var(--accent);
-            text-shadow:
-                0 0 40px color-mix(in srgb, var(--accent) 60%, transparent),
-                0 0 80px color-mix(in srgb, var(--accent) 25%, transparent);
-            animation: pulse-glow 3s ease-in-out infinite;
         }
-    }
-
-    @keyframes pulse-glow {
-        0%, 100% { text-shadow:
-            0 0 30px color-mix(in srgb, var(--accent) 55%, transparent),
-            0 0 70px color-mix(in srgb, var(--accent) 20%, transparent); }
-        50%       { text-shadow:
-            0 0 55px color-mix(in srgb, var(--accent) 75%, transparent),
-            0 0 110px color-mix(in srgb, var(--accent) 35%, transparent); }
     }
 
     .desc {
