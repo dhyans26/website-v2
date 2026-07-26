@@ -1,12 +1,42 @@
 ---
 ---
-<div class="globe-wrap">
-  <svg class="globe-svg"></svg>
-  <span class="globe-hint mono">drag to rotate</span>
+<div class="globe-host" data-globe-host>
+  <div class="globe-stage" data-globe-stage>
+    <svg class="globe-svg"></svg>
+    <span class="globe-hint mono" data-globe-hint>drag to rotate</span>
+    <!-- shown only in the expanded overlay; see .globe-overlay .globe-note -->
+    <p class="globe-note mono">
+      borders come from a generic public dataset and are not an endorsement of any
+      political position
+    </p>
+    <button
+      class="globe-toggle"
+      data-globe-toggle
+      type="button"
+      aria-label="Expand globe"
+      aria-expanded="false"
+    >
+      <i class="bi bi-arrows-angle-expand" data-globe-icon></i>
+    </button>
+  </div>
 </div>
 
+<!--
+  Reparented to <body> on init. It must not stay nested inside .globe-card:
+  that card sets overflow: hidden and a :hover transform, and a transformed
+  ancestor becomes the containing block for position: fixed descendants.
+-->
+<div class="globe-overlay" data-globe-overlay hidden></div>
+
 <style lang="scss">
-  .globe-wrap {
+  .globe-host {
+    width: 100%;
+    height: 100%;
+    display: flex;
+  }
+
+  .globe-stage {
+    position: relative;
     width: 100%;
     height: 100%;
     display: flex;
@@ -59,6 +89,102 @@
   .globe-hint {
     font-size: 0.72rem;
     color: var(--text-dim);
+    text-align: center;
+  }
+
+  // too cramped to read on the small card — the overlay rule below reveals it
+  .globe-note { display: none; }
+
+  /* ── expand / collapse control ── */
+  .globe-toggle {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
+
+    &:hover { background: var(--border); color: var(--text); }
+
+    // keyboard users get it unconditionally; pointer users on card hover
+    &:focus-visible { opacity: 1; }
+
+    .globe-stage:hover & { opacity: 1; }
+  }
+
+  /* ── expanded overlay ── */
+  .globe-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 4vw, 3rem);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+
+    &.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    // display: flex above would otherwise defeat the hidden attribute
+    &[hidden] { display: none; }
+
+    .globe-stage {
+      width: min(92vw, 84vh);
+      height: min(92vw, 84vh);
+      max-width: 56rem;
+      max-height: 56rem;
+      padding: 1.25rem;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 1.5rem;
+      // transforms don't affect layout size, so this can't retrigger the
+      // ResizeObserver that drives reprojection
+      transform: translateY(12px) scale(0.98);
+      transition: transform 0.25s ease;
+    }
+
+    &.open .globe-stage { transform: translateY(0) scale(1); }
+
+    .globe-toggle {
+      top: 1rem;
+      right: 1rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      font-size: 0.95rem;
+      opacity: 1;
+    }
+
+    .globe-hint { font-size: 0.8rem; }
+
+    .globe-note {
+      display: block;
+      max-width: 34rem;
+      margin: 0;
+      text-align: center;
+      font-size: 0.68rem;
+      line-height: 1.5;
+      color: var(--text-dim);
+      opacity: 0.75;
+      text-wrap: balance;
+    }
   }
 </style>
 
@@ -71,17 +197,18 @@
   const VISITED = new Set([840, 124, 826, 250, 276, 528, 784, 356]);
 
   document.addEventListener('DOMContentLoaded', async () => {
-    const wrap = document.querySelector<HTMLElement>('.globe-wrap');
+    const host = document.querySelector<HTMLElement>('[data-globe-host]');
+    const stage = document.querySelector<HTMLElement>('[data-globe-stage]');
+    const overlay = document.querySelector<HTMLElement>('[data-globe-overlay]');
+    const toggle = document.querySelector<HTMLButtonElement>('[data-globe-toggle]');
+    const icon = document.querySelector<HTMLElement>('[data-globe-icon]');
+    const hint = document.querySelector<HTMLElement>('[data-globe-hint]');
     const svgEl = document.querySelector<SVGSVGElement>('.globe-svg');
-    if (!wrap || !svgEl) return;
+    if (!host || !stage || !overlay || !toggle || !icon || !hint || !svgEl) return;
 
-    const size = Math.min(wrap.clientWidth, wrap.clientHeight - 32);
-    const W = size, H = size;
-    svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    document.body.appendChild(overlay);
 
     const projection = d3.geoOrthographic()
-      .scale((Math.min(W, H) - 4) / 2)
-      .translate([W / 2, H / 2])
       .clipAngle(90)
       .rotate([-15, -30]);
 
@@ -99,6 +226,27 @@
       .attr('class', 'graticule')
       .attr('d', path as unknown as string);
 
+    const redraw = () => svg.selectAll<SVGPathElement, unknown>('path').attr('d', path as unknown as string);
+
+    // Re-fit the projection to whatever box the svg currently occupies. Driven by
+    // a ResizeObserver so it covers both expand/collapse and plain window resizes.
+    //
+    // Measure via contentRect / clientWidth, never getBoundingClientRect: the
+    // expand animation scales the stage, and gBCR reports the *transformed* box,
+    // which would bake the in-flight scale into the viewBox.
+    const layout = (box?: DOMRectReadOnly) => {
+      const W = Math.max(Math.round(box?.width ?? svgEl.clientWidth), 1);
+      const H = Math.max(Math.round(box?.height ?? svgEl.clientHeight), 1);
+      svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      projection
+        .scale((Math.min(W, H) - 4) / 2)
+        .translate([W / 2, H / 2]);
+      redraw();
+    };
+
+    layout();
+    new ResizeObserver(([entry]) => layout(entry.contentRect)).observe(svgEl);
+
     const world = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
       .then(r => r.json()) as Topology;
 
@@ -109,8 +257,6 @@
       .join('path')
       .attr('class', d => `country${VISITED.has(+(d.id ?? 0)) ? ' visited' : ''}`)
       .attr('d', path as unknown as string);
-
-    const redraw = () => svg.selectAll<SVGPathElement, unknown>('path').attr('d', path as unknown as string);
 
     let dragging = false;
     svg.call(
@@ -148,14 +294,79 @@
     };
 
     if (!reduceMotion) {
+      // observes the stage element itself, so it keeps working across reparenting
       new IntersectionObserver(([entry]) => {
         onScreen = entry.isIntersecting;
         onScreen ? startSpin() : stopSpin();
-      }).observe(wrap);
+      }).observe(stage);
 
       document.addEventListener('visibilitychange', () => {
         document.hidden ? stopSpin() : startSpin();
       });
     }
+
+    /* ── expand / collapse ────────────────────────────────────────────────
+       The stage node is *moved* between host and overlay rather than
+       re-rendered, so the d3 selections, drag handler and current rotation
+       all survive. .globe-card keeps its min-height, so the card it leaves
+       behind doesn't collapse.                                            */
+    let expanded = false;
+
+    const setChrome = () => {
+      icon.className = expanded
+        ? 'bi bi-arrows-angle-contract'
+        : 'bi bi-arrows-angle-expand';
+      toggle.setAttribute('aria-label', expanded ? 'Collapse globe' : 'Expand globe');
+      toggle.setAttribute('aria-expanded', String(expanded));
+      hint.textContent = expanded
+        ? `drag to rotate · ${VISITED.size} countries visited`
+        : 'drag to rotate';
+    };
+
+    const expand = () => {
+      if (expanded) return;
+      expanded = true;
+      overlay.removeAttribute('hidden');
+      overlay.appendChild(stage);
+      document.body.style.overflow = 'hidden';
+      setChrome();
+      layout();
+      requestAnimationFrame(() => overlay.classList.add('open'));
+      toggle.focus();
+    };
+
+    const collapse = () => {
+      if (!expanded) return;
+      expanded = false;
+      overlay.classList.remove('open');
+      setChrome();
+
+      const done = () => {
+        clearTimeout(fallback);
+        host.appendChild(stage);
+        overlay.setAttribute('hidden', '');
+        document.body.style.overflow = '';
+        layout();
+        toggle.focus();
+      };
+      const fallback = setTimeout(done, 350);
+      overlay.addEventListener('transitionend', done, { once: true });
+    };
+
+    toggle.addEventListener('click', event => {
+      event.stopPropagation();
+      expanded ? collapse() : expand();
+    });
+
+    // don't let a click on the control start a globe drag
+    toggle.addEventListener('pointerdown', event => event.stopPropagation());
+
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay) collapse();
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && expanded) collapse();
+    });
   });
 </script>
