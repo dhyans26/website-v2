@@ -1,12 +1,19 @@
 ---
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { parse } from 'yaml';
 
 const logos = parse(readFileSync('src/content/tech.yaml', 'utf-8')) as {
     name: string; slug: string; color: string; href: string;
 }[];
 
-const track = [...logos, ...logos];
+// Icons are generated into public/tech/ by scripts/build-tech-icons.mjs
+// (npm run tech-icons, wired to prebuild/predev). Anything simple-icons
+// doesn't carry — Java, which was pulled over Oracle's trademark — has no
+// file and falls back to a text pill instead of a broken image.
+const track = [...logos, ...logos].map((logo) => ({
+    ...logo,
+    icon: existsSync(`public/tech/${logo.slug}.svg`) ? `/tech/${logo.slug}.svg` : null,
+}));
 ---
 
 <section class="marquee">
@@ -18,11 +25,9 @@ const track = [...logos, ...logos];
         <div class="track">
             {track.map((logo) => (
                 <a href={logo.href} target="_blank" rel="noopener noreferrer" aria-label={logo.name}>
-                    <img
-                        src={`https://cdn.simpleicons.org/${logo.slug}/${logo.color}`}
-                        alt={logo.name}
-                        loading="lazy"
-                    />
+                    {logo.icon
+                        ? <img src={logo.icon} alt={logo.name} loading="lazy" width="40" height="40" />
+                        : <span class="logo-fallback mono" style={`color: #${logo.color}`}>{logo.name}</span>}
                 </a>
             ))}
         </div>
@@ -97,7 +102,21 @@ const track = [...logos, ...logos];
 
         img {
             height: 2.5rem;
-            width: auto;
+            width: 2.5rem; // simple-icons are square; reserve the box so the
+            object-fit: contain; // track doesn't reflow as lazy icons arrive
+        }
+
+        // stands in for any tech with no simple-icons entry
+        .logo-fallback {
+            display: flex;
+            align-items: center;
+            height: 2.5rem;
+            padding: 0 0.85rem;
+            border: 1px solid currentColor;
+            border-radius: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
         }
     }
 </style>

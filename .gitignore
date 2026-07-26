@@ -30,3 +30,6 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 .vscode/
+
+# generated from src/content/tech.yaml by scripts/build-tech-icons.mjs
+public/tech/

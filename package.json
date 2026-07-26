@@ -19,6 +19,7 @@
     "@types/topojson-client": "^3.1.5",
     "bootstrap-icons": "^1.13.1",
     "d3": "^7.9.0",
+    "simple-icons": "^16.27.1",
     "topojson-client": "^3.1.0",
     "yaml": "^2.8.2"
   }
