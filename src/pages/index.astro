@@ -7,7 +7,8 @@ import Experiences from '../components/Experiences.astro';
 import { readFileSync } from 'fs';
 import { parse } from 'yaml';
 
-const allProjects = parse(readFileSync('src/content/projects.yaml', 'utf-8'));
+// filter(Boolean) drops empty list entries (a bare "-") left behind while editing the YAML
+const allProjects = (parse(readFileSync('src/content/projects.yaml', 'utf-8')) ?? []).filter(Boolean);
 const pinned = allProjects.filter((p: any) => p.pinned);
 
 const expData = parse(readFileSync('src/content/experiences.yaml', 'utf-8')) || {};

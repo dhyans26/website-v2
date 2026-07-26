@@ -4,7 +4,8 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { parse } from 'yaml';
 import { INFO } from '../../consts';
 
-const projects = parse(readFileSync('src/content/projects.yaml', 'utf-8'));
+// filter(Boolean) drops empty list entries (a bare "-") left behind while editing the YAML
+const projects = (parse(readFileSync('src/content/projects.yaml', 'utf-8')) ?? []).filter(Boolean);
 const isVideo = (src: string) => /\.(mp4|webm|mov|ogg)(\?|$)/i.test(src);
 const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
 

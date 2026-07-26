@@ -1,9 +1,22 @@
 # media: list paths relative to /public — images or videos (.mp4/.webm)
 # accent: card hover color — red | blue | yellow | purple | pink | green
+
+
+# sample
+#- title:
+#  description:
+#  tech:
+#    -
+#  github:
+#  live:
+#  pinned:
+#  accent:
+#  media:
+#    -
+-
 - title: Clubs Platform
   description: An integrated platform for Hack Clubs around the world to manage their clubs
     and run workshops from start to finish! More to be revealed soon...
-
   tech:
     - Svelte
     - Typescript
@@ -53,10 +66,22 @@
     - KiCad
     - OnShape
     - KMK
-  github: https://github.com/Bluelightning26/BluBoard
+  github: https://github.com/dhyans26/BluBoard
   pinned: true
   accent: yellow
   media:
     - /projects/bluBoardPcb.webp
     - /projects/bluBoardSide.webp
     - /projects/bluBoardTopDown.webp
+    -
+- title: Swirl
+  description: Was one of the
+  tech:
+    - HTML
+    - CSS
+    - JS
+  github: https://github.com/hackclub/swirl
+  live: https://swirl.hackclub.com
+  pinned: false
+  accent: green
+  media:
