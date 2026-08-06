@@ -67,7 +67,7 @@
     - OnShape
     - KMK
   github: https://github.com/dhyans26/BluBoard
-  pinned: true
+  pinned: false
   accent: yellow
   media:
     - /projects/bluBoardPcb.webp
