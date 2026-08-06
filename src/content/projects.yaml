@@ -16,7 +16,7 @@
 -
 - title: Clubs Platform
   description: An integrated platform for Hack Clubs around the world to manage their clubs
-    and run workshops from start to finish! More to be revealed soon...
+    and run workshops from start to finish!
   tech:
     - Svelte
     - Typescript
@@ -25,8 +25,8 @@
   pinned: true
   accent: blue
   media:
-    - /projects/internR.webp
-    - /projects/internY.webp
+    - https://cdn.hackclub.com/019fd92d-de58-723a-9a55-957810395fab/screenshot_2026-08-06_at_6.24.27___pm.png
+    - https://user-cdn.hackclub-assets.com/019fd930-3892-79dd-ae32-1ae5462bf800/Screenshot%202026-08-06%20at%206.26.53%E2%80%AFPM.png
 - title: 3d Snake
   description: Snake ported to the third dimension!
     A cool custom 3D game console that spins to face the user in the age-old nostalgic classic game of Snake!
@@ -75,7 +75,9 @@
     - /projects/bluBoardTopDown.webp
     -
 - title: Swirl
-  description: Was one of the
+  description: As one of Hack Club’s first YSWS projects, launched in the spring of 2025,
+    Swirl was the first project I built that had real users and was targeted toward beginners.
+    It’s also one of the longest-running and still actively maintained programs.
   tech:
     - HTML
     - CSS
@@ -85,3 +87,4 @@
   pinned: false
   accent: green
   media:
+    - https://user-cdn.hackclub-assets.com/019fd932-3cb1-763f-be44-bbea20999fdc/Screenshot%202026-08-06%20at%206.29.31%E2%80%AFPM.png
