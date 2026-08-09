@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
+import { readFileSync } from 'fs';
 import { parse } from 'yaml';
 import { INFO } from '../../consts';
+import { cached, gh, timeAgo } from '../../lib/github';
 
 // filter(Boolean) drops empty list entries (a bare "-") left behind while editing the YAML
 const projects = (parse(readFileSync('src/content/projects.yaml', 'utf-8')) ?? []).filter(Boolean);
@@ -17,64 +18,33 @@ type LatestCommit = {
     ago: string;
 };
 
-function timeAgo(date: Date): string {
-    const mins = Math.floor((Date.now() - date.getTime()) / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
-    return `${Math.floor(mins / 1440)}d ago`;
-}
-
 const repoSlugs = (projects as any[])
     .map((p: any) => p.github)
     .filter(Boolean)
     .map((url: string) => url.replace('https://github.com/', ''))
     .filter((slug: string) => /^[\w.-]+\/[\w.-]+$/.test(slug));
 
-const CACHE_FILE = '.cache/github-commits.json';
-const CACHE_TTL  = 10 * 60 * 1000; // 10 minutes
+const COMMITS_TTL = 10 * 60 * 1000; // 10 minutes
 
-type CacheEntry = { fetchedAt: number; results: any[] };
-
-function readCache(): CacheEntry | null {
-    try {
-        const raw = readFileSync(CACHE_FILE, 'utf-8');
-        const entry: CacheEntry = JSON.parse(raw);
-        if (Date.now() - entry.fetchedAt < CACHE_TTL) return entry;
-    } catch {}
-    return null;
-}
-
-function writeCache(results: any[]) {
-    try {
-        mkdirSync('.cache', { recursive: true });
-        writeFileSync(CACHE_FILE, JSON.stringify({ fetchedAt: Date.now(), results }));
-    } catch {}
-}
-
-const cached = readCache();
-const commitResults: any[] = cached
-    ? cached.results
-    : await (async () => {
-        const results = await Promise.all(
-            repoSlugs.map(async (slug: string) => {
-                try {
-                    const resp = await fetch(`https://api.github.com/repos/${slug}/commits?per_page=1`);
-                    if (!resp.ok) return null;
-                    const [c] = await resp.json();
-                    if (!c) return null;
-                    return {
-                        message: c.commit.message.split('\n')[0],
-                        repoName: slug.split('/')[1],
-                        sha: c.sha.slice(0, 7),
-                        url: c.html_url,
-                        date: new Date(c.commit.committer.date).toISOString(),
-                    };
-                } catch { return null; }
-            })
-        );
-        writeCache(results);
-        return results;
-    })();
+// Private or missing repos throw inside gh() and land here as null, which the
+// sort below filters out.
+const commitResults: any[] = (await cached('github-commits', COMMITS_TTL, () =>
+    Promise.all(
+        repoSlugs.map(async (slug: string) => {
+            try {
+                const [c] = await gh(`/repos/${slug}/commits?per_page=1`);
+                if (!c) return null;
+                return {
+                    message: c.commit.message.split('\n')[0],
+                    repoName: slug.split('/')[1],
+                    sha: c.sha.slice(0, 7),
+                    url: c.html_url,
+                    date: new Date(c.commit.committer.date).toISOString(),
+                };
+            } catch { return null; }
+        }),
+    ),
+)) ?? [];
 
 const best = commitResults
     .filter(Boolean)

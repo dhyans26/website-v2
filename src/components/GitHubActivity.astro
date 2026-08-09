@@ -1,0 +1,143 @@
+---
+import { INFO } from '../consts';
+import { fetchActivity, fetchContributions, timeAgo } from '../lib/github';
+import ContributionGraph from './ContributionGraph.astro';
+
+const login = INFO.github;
+
+// Both degrade to null / [] on a rate-limited, tokenless or offline build.
+const [contributions, activity] = await Promise.all([
+    fetchContributions(login),
+    fetchActivity(login, 6),
+]);
+
+const rows = activity.map((a) => ({ ...a, ago: timeAgo(new Date(a.date)) }));
+---
+
+{(contributions || rows.length > 0) && (
+    <section class="gh container">
+        <header class="section-head">
+            <div class="head-row">
+                <h2>fun stats</h2>
+                <a
+                    href={`https://github.com/${login}`}
+                    class="view-all mono"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    @{login} <i class="bi bi-arrow-up-right"></i>
+                </a>
+            </div>
+        </header>
+
+        {contributions && <ContributionGraph data={contributions} />}
+
+        {rows.length > 0 && (
+            <Fragment>
+            <p class="note">
+                <i class="bi bi-info-circle"></i>
+                shown below is only public activity
+            </p>
+            <ul class="feed">
+                {rows.map((r) => (
+                    <li>
+                        <a class="row mono" href={r.url} target="_blank" rel="noopener noreferrer">
+                            <i class={`bi ${r.icon}`}></i>
+                            <span class="what">{r.text}</span>
+                            <span class="in">in</span>
+                            <span class="repo">{r.repo}</span>
+                            <span class="ago">{r.ago}</span>
+                        </a>
+                    </li>
+                ))}
+            </ul>
+            </Fragment>
+        )}
+    </section>
+)}
+
+<style lang="scss">
+    .gh {
+        padding: 2rem 1.5rem 3rem;
+    }
+
+    .section-head {
+        margin-bottom: 1.5rem;
+    }
+
+    .head-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+
+        h2 {
+            color: var(--text);
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 700;
+        }
+    }
+
+    // Caption for the feed below it, not the graph above it.
+    .note {
+        margin: 0 0 0.6rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+
+        .bi { color: var(--text-dim); margin-right: 0.35rem; }
+    }
+
+    .view-all {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+        transition: color 0.2s ease, gap 0.2s ease;
+
+        &:hover { color: var(--yellow); gap: 0.6rem; }
+    }
+
+    .feed {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem 0.9rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 0.6rem;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: border-color 0.2s ease, color 0.2s ease;
+
+        &:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .bi { color: var(--text-dim); flex-shrink: 0; }
+        .what { color: var(--text); }
+        .in   { color: var(--text-dim); }
+        .repo { color: var(--accent); }
+
+        // pushes the timestamp to the far edge on wide rows, wraps under on narrow
+        .ago {
+            color: var(--text-dim);
+            margin-left: auto;
+            padding-left: 0.5rem;
+        }
+    }
+</style>

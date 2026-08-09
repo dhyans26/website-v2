@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Landing from '../components/Landing.astro';
 import LogoCarousel from '../components/LogoCarousel.astro';
 import Experiences from '../components/Experiences.astro';
+import GitHubActivity from '../components/GitHubActivity.astro';
 
 import { readFileSync } from 'fs';
 import { parse } from 'yaml';
@@ -84,6 +85,8 @@ const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
             })}
         </div>
     </section>
+
+    <GitHubActivity />
 
     <LogoCarousel />
 </BaseLayout>

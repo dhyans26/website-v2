@@ -1,0 +1,250 @@
+---
+import type { Contributions } from '../lib/github';
+
+interface Props {
+    data: Contributions;
+}
+
+const { data } = Astro.props;
+const weeks = data.weeks;
+
+// Geometry. STEP - CELL leaves the surface gap that separates adjacent cells.
+const CELL = 11;
+const GAP = 3;
+const STEP = CELL + GAP;
+const PAD_LEFT = 28; // weekday labels
+const PAD_TOP = 16; // month labels
+
+const width = PAD_LEFT + weeks.length * STEP;
+const height = PAD_TOP + 7 * STEP;
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// Parse as UTC — a bare "2026-08-09" is otherwise read in local time and can
+// slip to the previous day west of Greenwich.
+const asUTC = (iso: string) => new Date(`${iso}T00:00:00Z`);
+
+const fmtDate = (iso: string) =>
+    asUTC(iso).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        timeZone: 'UTC',
+    });
+
+// One label per month, skipped when it would crowd the previous one.
+const monthLabels: { x: number; label: string }[] = [];
+let lastMonth = -1;
+weeks.forEach((w, i) => {
+    const first = w[0];
+    if (!first) return;
+    const m = asUTC(first.date).getUTCMonth();
+    if (m === lastMonth) return;
+    lastMonth = m;
+    const x = PAD_LEFT + i * STEP;
+    const prev = monthLabels[monthLabels.length - 1];
+    if (!prev || x - prev.x >= 3 * STEP) monthLabels.push({ x, label: MONTHS[m] });
+});
+
+// Mon / Wed / Fri, matching GitHub's own calendar (row 0 is Sunday).
+const dayLabels = [
+    { row: 1, label: 'Mon' },
+    { row: 3, label: 'Wed' },
+    { row: 5, label: 'Fri' },
+];
+
+const total = data.total.toLocaleString('en-US');
+---
+
+<figure class="graph">
+    <figcaption class="cap">
+        <strong>{total}</strong> contributions in the last year
+    </figcaption>
+
+    <div class="scroll">
+        <svg
+            class="cal"
+            viewBox={`0 0 ${width} ${height}`}
+            role="img"
+            aria-label={`GitHub contribution graph: ${total} contributions in the last year`}
+        >
+            {monthLabels.map((m) => (
+                <text class="axis mono" x={m.x} y={10}>{m.label}</text>
+            ))}
+
+            {dayLabels.map((d) => (
+                <text class="axis mono" x={0} y={PAD_TOP + d.row * STEP + CELL - 1}>{d.label}</text>
+            ))}
+
+            {weeks.map((week, wi) =>
+                week.map((day) => {
+                    const row = asUTC(day.date).getUTCDay();
+                    return (
+                        <rect
+                            class={`cell lvl-${day.level}`}
+                            x={PAD_LEFT + wi * STEP}
+                            y={PAD_TOP + row * STEP}
+                            width={CELL}
+                            height={CELL}
+                            rx={2}
+                            data-n={day.count === 0
+                                ? 'no contributions'
+                                : `${day.count} contribution${day.count === 1 ? '' : 's'}`}
+                            data-d={fmtDate(day.date)}
+                        />
+                    );
+                }),
+            )}
+        </svg>
+    </div>
+
+    {/* Lives outside .scroll — that container clips, so a tooltip inside it
+        would be cut off above the grid. */}
+    <div class="tip mono" role="tooltip" hidden>
+        <span class="tip-n"></span>
+        <span class="tip-d"></span>
+    </div>
+
+    <div class="legend mono">
+        <span>less</span>
+        <svg width={5 * STEP - GAP} height={CELL} aria-hidden="true">
+            {[0, 1, 2, 3, 4].map((l) => (
+                <rect class={`cell lvl-${l}`} x={l * STEP} y={0} width={CELL} height={CELL} rx={2} />
+            ))}
+        </svg>
+        <span>more</span>
+    </div>
+</figure>
+
+<script>
+    const fig = document.querySelector<HTMLElement>('.graph');
+    const tip = fig?.querySelector<HTMLElement>('.tip');
+    const tipN = tip?.querySelector<HTMLElement>('.tip-n');
+    const tipD = tip?.querySelector<HTMLElement>('.tip-d');
+
+    if (fig && tip && tipN && tipD) {
+        const GAP = 8;
+
+        const show = (cell: Element) => {
+            tipN.textContent = (cell as SVGElement).dataset.n ?? '';
+            tipD.textContent = (cell as SVGElement).dataset.d ?? '';
+            tip.hidden = false;
+
+            // Viewport-relative rects, so the container's scroll offset is
+            // already accounted for.
+            const c = cell.getBoundingClientRect();
+            const f = fig.getBoundingClientRect();
+            const w = tip.offsetWidth;
+
+            // Keep the box inside the figure rather than bleeding off the edge.
+            const half = w / 2;
+            const x = Math.min(Math.max(c.left - f.left + c.width / 2, half), f.width - half);
+
+            const above = c.top - f.top - GAP;
+            const flip = above - tip.offsetHeight < 0;
+            tip.classList.toggle('below', flip);
+            tip.style.left = `${x}px`;
+            tip.style.top = `${flip ? c.bottom - f.top + GAP : above}px`;
+        };
+
+        fig.addEventListener('pointerover', (e) => {
+            const cell = (e.target as Element)?.closest?.('[data-n]');
+            if (cell) show(cell);
+        });
+
+        fig.addEventListener('pointerout', (e) => {
+            if ((e.target as Element)?.closest?.('[data-n]')) tip.hidden = true;
+        });
+
+        // Touch: tapping elsewhere dismisses it.
+        document.addEventListener('pointerdown', (e) => {
+            if (!(e.target as Element)?.closest?.('[data-n]')) tip.hidden = true;
+        });
+    }
+</script>
+
+<style lang="scss">
+    .graph {
+        margin: 0 0 1.5rem;
+        position: relative;
+    }
+
+    // Two stacked lines keep the box narrow instead of one long sentence.
+    .tip {
+        position: absolute;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.1rem;
+        padding: 0.35rem 0.6rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 0.6rem;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+        font-size: 0.68rem;
+        line-height: 1.35;
+        white-space: nowrap;
+        pointer-events: none;
+        transform: translate(-50%, -100%);
+
+        &[hidden] { display: none; }
+
+        // Flipped under the cell when there's no room above.
+        &.below { transform: translate(-50%, 0); }
+
+        .tip-n { color: var(--text); }
+        .tip-d { color: var(--text-dim); }
+    }
+
+    .cap {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 0.6rem;
+
+        strong { color: var(--text); font-weight: 700; }
+    }
+
+    // The grid is ~750px wide and must not force the page to scroll sideways.
+    .scroll {
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+    }
+
+    svg { display: block; }
+
+    // Fills the container on desktop so the grid lines up with the feed rows
+    // below; min-width keeps the cells legible on phones, where .scroll takes over.
+    .cal {
+        width: 100%;
+        height: auto;
+        min-width: 740px;
+    }
+
+    // font-family comes from the global .mono class
+    .axis {
+        fill: var(--text-dim);
+        font-size: 9px;
+    }
+
+    // Sequential ramp: one hue, low → high, mixed toward the active accent so it
+    // follows the theme picker. Level 0 is the empty-day surface.
+    .cell {
+        stroke: none;
+        &.lvl-0 { fill: var(--surface-2); }
+        &.lvl-1 { fill: color-mix(in srgb, var(--accent) 28%, var(--surface-2)); }
+        &.lvl-2 { fill: color-mix(in srgb, var(--accent) 52%, var(--surface-2)); }
+        &.lvl-3 { fill: color-mix(in srgb, var(--accent) 76%, var(--surface-2)); }
+        &.lvl-4 { fill: var(--accent); }
+    }
+
+    .legend {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+        font-size: 0.7rem;
+        color: var(--text-dim);
+    }
+</style>
