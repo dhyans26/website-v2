@@ -54,39 +54,8 @@ const defaultPfp = pfpList.reduce((best, p) => p.w >= best.w ? p : best, pfpList
             data-pfp={JSON.stringify(pfpList)}
         />
         <span class="status mono">
-            <span class="planet" aria-label="saturn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 20" aria-hidden="true">
-                    <defs>
-                        <radialGradient id="lp-body" cx="38%" cy="32%" r="65%">
-                            <stop offset="0%"   stop-color="#e0d5ff"/>
-                            <stop offset="50%"  stop-color="#9b7fe8"/>
-                            <stop offset="100%" stop-color="#4e2fa0"/>
-                        </radialGradient>
-                        <linearGradient id="lp-ring" x1="1" y1="10" x2="27" y2="10" gradientUnits="userSpaceOnUse">
-                            <stop offset="0%"   stop-color="#ffee99" stop-opacity="0"/>
-                            <stop offset="28%"  stop-color="#ffee99" stop-opacity="0.9"/>
-                            <stop offset="72%"  stop-color="#ffc399" stop-opacity="0.9"/>
-                            <stop offset="100%" stop-color="#ffc399" stop-opacity="0"/>
-                        </linearGradient>
-                    </defs>
-
-                    <!-- back ring arc (upper half, drawn behind planet) -->
-                    <path d="M 1,10 A 13,4 0 0 0 27,10" fill="none" stroke="url(#lp-ring)" stroke-width="2.5" opacity="0.4"/>
-
-                    <!-- planet body -->
-                    <circle cx="14" cy="10" r="7.5" fill="url(#lp-body)"/>
-
-                    <!-- subtle atmosphere bands -->
-                    <ellipse cx="14" cy="8"  rx="7.3" ry="1.7" fill="rgba(255,255,255,0.07)"/>
-                    <ellipse cx="14" cy="12" rx="7.3" ry="1.4" fill="rgba(0,0,0,0.1)"/>
-
-                    <!-- specular highlight -->
-                    <circle cx="11.5" cy="7.5" r="2.2" fill="rgba(255,255,255,0.22)"/>
-
-                    <!-- front ring arc (lower half, drawn in front of planet) -->
-                    <path d="M 1,10 A 13,4 0 0 1 27,10" fill="none" stroke="url(#lp-ring)" stroke-width="2.5"/>
-                </svg>
-            </span> <span id="pfp-caption">{defaultPfp.caption}</span>
+            <i class="bi bi-camera-fill badge-icon" aria-label="photo"></i>
+            <span id="pfp-caption">{defaultPfp.caption}</span>
         </span>
     </div>
 </section>
@@ -222,17 +191,13 @@ const defaultPfp = pfpList.reduce((best, p) => p.w >= best.w ? p : best, pfpList
         white-space: nowrap;
     }
 
-    .planet {
+    .badge-icon {
         display: inline-flex;
         align-items: center;
+        font-size: 0.95rem;
+        line-height: 1;
+        color: var(--accent);
         animation: float 4s ease-in-out infinite;
-
-        svg {
-            width: 1.5rem;
-            height: auto;
-            overflow: visible;
-            transform: rotate(360-20deg);
-        }
     }
 
     @keyframes float {

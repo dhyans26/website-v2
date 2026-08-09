@@ -47,7 +47,8 @@
 - title: DhyanAi
   description: An AI aggregate chat portal that's unblocked, with a custom admin panel and statistics. Designed for use with peers.
     Based on LibreAI, this is a password-protected way to manage and audit AI use at scale while keeping your data private from school administrators.
-    Currently closed source, url will be made public and it will be open sourced at the end of the school year to help protect academic integrity.
+    Additionally, users with access to the library can view books that admins have uploaded (epub or pdf) and have given access to and can ask questions, get summaries and read the original text in an on-platform e-book reader to help enrich grasping core concepts of the text. 
+    Currently closed source, it will be open sourced at the end of the 2026-2027 school year to help protect academic integrity due to it's potential for misuse.
   live:
   tech:
     - Astro
