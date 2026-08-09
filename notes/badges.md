@@ -1,3 +1,8 @@
+# badges
+
+Scratch collection of [shields.io](https://shields.io) badges for READMEs. Not part of
+the site — kept outside `src/` so Astro doesn't build it into a route.
+
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=flat&logo=github&logoColor=white)
 
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=flat&logo=openjdk&logoColor=white)
