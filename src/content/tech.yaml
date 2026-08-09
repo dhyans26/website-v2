@@ -80,10 +80,20 @@
   color: "7952B3"
   href: https://getbootstrap.com
 
+- name: MDX
+  slug: mdx
+  color: "FFFFFF"
+  href: https://mdxjs.com
+
 - name: Next.js
   slug: nextdotjs
   color: "FFFFFF"
   href: https://nextjs.org
+
+- name: Nuxt
+  slug: nuxt
+  color: "00DC82"
+  href: https://nuxt.com
 
 - name: React
   slug: react
@@ -94,6 +104,11 @@
   slug: sass
   color: "CC6699"
   href: https://sass-lang.com
+
+- name: shadcn/ui
+  slug: shadcnui
+  color: "FFFFFF" # brand hex is pure black — unusable here
+  href: https://ui.shadcn.com
 
 - name: Svelte
   slug: svelte
@@ -110,11 +125,16 @@
   color: "4FC08D"
   href: https://vuejs.org
 
-# ── runtime & build ─────────────────────────────────────────────
+# ── backend, runtime & build ────────────────────────────────────
 - name: Bun
   slug: bun
   color: "FBF0DF"
   href: https://bun.sh
+
+- name: Flask
+  slug: flask
+  color: "3BABC3"
+  href: https://flask.palletsprojects.com
 
 - name: GNU Bash
   slug: gnubash
@@ -158,6 +178,11 @@
   href: https://yarnpkg.com
 
 # ── databases ───────────────────────────────────────────────────
+- name: Drizzle ORM
+  slug: drizzle
+  color: "C5F74F"
+  href: https://orm.drizzle.team
+
 - name: MongoDB
   slug: mongodb
   color: "47A248"
@@ -168,10 +193,20 @@
   color: "4479A1"
   href: https://www.mysql.com
 
+- name: Neon
+  slug: neon
+  color: "34D59A"
+  href: https://neon.com
+
 - name: PostgreSQL
   slug: postgresql
   color: "4169E1"
   href: https://www.postgresql.org
+
+- name: Upstash
+  slug: upstash
+  color: "00E9A3"
+  href: https://upstash.com
 
 # ── ai / ml ─────────────────────────────────────────────────────
 - name: Hugging Face
@@ -188,6 +223,11 @@
   slug: ollama
   color: "FFFFFF"
   href: https://ollama.com
+
+- name: OpenRouter
+  slug: openrouter
+  color: "94A3B8"
+  href: https://openrouter.ai
 
 - name: pandas
   slug: pandas
@@ -221,6 +261,11 @@
   href: https://github.com/features/copilot
 
 # ── devtools ────────────────────────────────────────────────────
+- name: ESLint
+  slug: eslint
+  color: "7B68EE" # lightened from 4B32C3 — the brand indigo muddies on dark
+  href: https://eslint.org
+
 - name: GitHub
   slug: github
   color: "FFFFFF"
@@ -250,6 +295,21 @@
   slug: qmk
   color: "1F8FEB"
   href: https://qmk.fm
+
+- name: Termius
+  slug: termius
+  color: "FFFFFF" # brand hex is pure black — unusable here
+  href: https://termius.com
+
+- name: Vitest
+  slug: vitest
+  color: "00FF74"
+  href: https://vitest.dev
+
+- name: Zod
+  slug: zod
+  color: "408AFF"
+  href: https://zod.dev
 
 # ── editors ─────────────────────────────────────────────────────
 - name: IntelliJ IDEA
@@ -321,6 +381,11 @@
   color: "2496ED"
   href: https://www.docker.com
 
+- name: Ente
+  slug: ente
+  color: "00BC45"
+  href: https://ente.io
+
 - name: Firebase
   slug: firebase
   color: "FFCA28"
@@ -340,6 +405,11 @@
   slug: vercel
   color: "FFFFFF"
   href: https://vercel.com
+
+- name: WireGuard
+  slug: wireguard
+  color: "88171A"
+  href: https://www.wireguard.com
 
 # ── hardware & embedded ─────────────────────────────────────────
 - name: Arduino

@@ -18,7 +18,7 @@
 
         <div class="info" id="modal-info">
             <h3 id="modal-title"></h3>
-            <p  id="modal-desc"></p>
+            <div class="desc" id="modal-desc"></div>
             <div class="pills" id="modal-tech"></div>
             <div class="ext-links" id="modal-links"></div>
         </div>
@@ -79,9 +79,23 @@
         renderDots();
     }
 
+    // blank line = paragraph break (YAML block scalars keep the newlines)
+    function renderDesc(text: string) {
+        descEl.innerHTML = '';
+        text.split(/\n\s*\n/)
+            .map(para => para.trim().replace(/\s*\n\s*/g, ' '))
+            .filter(Boolean)
+            .forEach(para => {
+                const p = document.createElement('p');
+                p.textContent = para;
+                descEl.appendChild(p);
+            });
+    }
+
     function openModal(data: {
         title: string;
         description: string;
+        longDescription?: string | null;
         tech: string[];
         github?: string;
         live?: string;
@@ -105,7 +119,7 @@
 
         // info
         titleEl.textContent = data.title;
-        descEl.textContent  = data.description;
+        renderDesc(data.longDescription || data.description);
 
         techEl.innerHTML = data.tech
             .map(t => `<span class="pill mono">${t}</span>`)
@@ -315,6 +329,12 @@
             font-size: 1rem;
             line-height: 1.6;
         }
+    }
+
+    .desc {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
     }
 
     .pills {

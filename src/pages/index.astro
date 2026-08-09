@@ -44,7 +44,7 @@ const cleanMedia = (raw: any[]) => (raw ?? []).filter(Boolean);
                 return (
                     <article
                         class={`card card-${p.accent ?? 'red'}`}
-                        data-project={JSON.stringify({ title: p.title, description: p.description, tech: p.tech, github: p.github, live: p.live ?? null, media })}
+                        data-project={JSON.stringify({ title: p.title, description: p.description, longDescription: p.longDescription ?? null, tech: p.tech, github: p.github, live: p.live ?? null, media })}
                     >
                         {hasThumb && (
                             <div class="thumb">

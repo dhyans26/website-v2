@@ -1,10 +1,15 @@
-# media: list paths relative to /public — images or videos (.mp4/.webm)
-# accent: card hover color — red | blue | yellow | purple | pink | green
+# description     : short one-liner shown on the project card
+# longDescription : full write-up shown in the modal — falls back to `description` when
+#                   omitted. Use a `|` block scalar if you want paragraph breaks
+#                   (blank line = new paragraph)
+# media           : list paths relative to /public — images or videos (.mp4/.webm)
+# accent          : card hover color — red | blue | yellow | purple | pink | green
 
 
 # sample
 #- title:
 #  description:
+#  longDescription:
 #  tech:
 #    -
 #  github:
@@ -17,6 +22,8 @@
 - title: Clubs Platform
   description: An integrated platform for Hack Clubs around the world to manage their clubs
     and run workshops from start to finish!
+  longDescription: An integrated platform for Hack Clubs around the world to manage their clubs
+    and run workshops from start to finish!
   tech:
     - Svelte
     - Typescript
@@ -28,7 +35,8 @@
     - https://cdn.hackclub.com/019fd92d-de58-723a-9a55-957810395fab/screenshot_2026-08-06_at_6.24.27___pm.png
     - https://user-cdn.hackclub-assets.com/019fd930-3892-79dd-ae32-1ae5462bf800/Screenshot%202026-08-06%20at%206.26.53%E2%80%AFPM.png
 - title: 3d Snake
-  description: Snake ported to the third dimension!
+  description: A custom-built spinning 3d version of the classic game snake! Built at Hack Club's Undercity Hackathon in sf
+  longDescription: Snake ported to the third dimension!
     A cool custom 3D game console that spins to face the user in the age-old nostalgic classic game of Snake!
     Made at Hack Club's Undercity Hackathon at GitHub hq (San Francisco),
     it was the most voted-on project in demos and won a podium position after final votes.
@@ -45,9 +53,10 @@
     - /projects/3d-snake.jpg
 
 - title: DhyanAi
-  description: An AI aggregate chat portal that's unblocked, with a custom admin panel and statistics. Designed for use with peers.
+  description: A private, unblocked AI chat portal for my peers, with an admin panel and a built-in ai library to analyze pieces of literature
+  longDescription: An AI aggregate chat portal that's unblocked, with a custom admin panel and statistics. Designed for use with peers.
     Based on LibreAI, this is a password-protected way to manage and audit AI use at scale while keeping your data private from school administrators.
-    Additionally, users with access to the library can view books that admins have uploaded (epub or pdf) and have given access to and can ask questions, get summaries and read the original text in an on-platform e-book reader to help enrich grasping core concepts of the text. 
+    Additionally, users with access to the library can view books that admins have uploaded (epub or pdf) and have given access to and can ask questions, get summaries and read the original text in an on-platform e-book reader to help enrich grasping core concepts of the text.
     Currently closed source, it will be open sourced at the end of the 2026-2027 school year to help protect academic integrity due to it's potential for misuse.
   live:
   tech:
@@ -61,7 +70,8 @@
     - /projects/internY.webp
 
 - title: BluBoard
-  description: A custom 75% keyboard! Has two rotary encoders with switches as an extra. Powered using a Pi Pico running KMK firmware.
+  description: A custom 75% mechanical keyboard!
+  longDescription: A custom 75% keyboard! Has two rotary encoders with switches as an extra. Powered using a Pi Pico running KMK firmware.
     Case designed in OnShape and 3d printed with a Bambu Lab A1 Mini, the PCB was designed fully in KiCad. It was the second keyboard I designed after BluPad, a macropad.
   tech:
     - KiCad
@@ -76,7 +86,8 @@
     - /projects/bluBoardTopDown.webp
     -
 - title: Swirl
-  description: As one of Hack Club’s first YSWS projects, launched in the spring of 2025,
+  description: one of my first projects with real users!
+  longDescription: As one of Hack Club’s first YSWS projects, launched in the spring of 2025,
     Swirl was the first project I built that had real users and was targeted toward beginners.
     It’s also one of the longest-running and still actively maintained programs.
   tech:
