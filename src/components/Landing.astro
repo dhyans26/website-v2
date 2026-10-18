@@ -28,11 +28,11 @@ const defaultPfp = pfpList.reduce((best, p) => p.w >= best.w ? p : best, pfpList
 
 <section class="hero container">
     <div class="intro">
-        <h1 id="hero-heading" data-prefix="I'm " data-name={INFO.name} aria-label={`I'm ${INFO.name}`}>
-            I'm <span class="accent">{INFO.name}</span><span class="cursor" aria-hidden="true"></span>
+        <h1 id="hero-heading" data-prefix="hi i'm " data-name={INFO.name} aria-label={`hi i'm ${INFO.name}`}>
+            hi, i'm <span class="accent">{INFO.name}</span><span class="cursor" aria-hidden="true"></span>
         </h1>
         <p class="lede">
-            A {INFO.education.toLowerCase()} {INFO.gradeLevel.toLowerCase()} from the {INFO.location} area,
+            i'm a {INFO.education.toLowerCase()} {INFO.gradeLevel.toLowerCase()} from the {INFO.location} area,
             currently tinkering and building underlying infrastructure <a href={INFO.employerUrl}><span class="hl">@ {INFO.employer}</span></a> as the {INFO.role} with the {INFO.program}.
             My interests primarily lie in sports, aerospace, and engineering.
         </p>
